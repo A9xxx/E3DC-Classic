@@ -1,0 +1,30 @@
+E3DC-Control Webportal Export
+Erstellt: 2026-02-20 14:46:57
+
+Quellen:
+  E3DC-Control: /home/pi/E3DC-Control
+  Webportal:    /var/www/html
+
+Inhalt (22 Dateien):
+  html/Wallbox.php
+  html/archiv.php
+  html/archiv_diagramm.php
+  html/auto.php
+  html/config_editor.php
+  html/e3dc_paths.json
+  html/favicon.ico
+  html/get_live_json.php
+  html/helpers.php
+  html/icons/icon-192.png
+  html/icons/icon-512.png
+  html/index.php
+  html/live_content.php
+  html/manifest.json
+  html/mobile.php
+  html/mobile_archiv.php
+  html/run_now.php
+  html/start_content.php
+  html/status.php
+  html/style.css
+  html/sw.js
+  plot_soc_changes.py
