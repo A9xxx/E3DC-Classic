@@ -106,7 +106,7 @@ def log_menu_action(menu_choice, menu_name):
     _session_stats["menu_actions"].append(action)
     
     logger = logging.getLogger("install")
-    logger.info(f"→ Benutzer wählte: {menu_name} ({menu_choice})")
+    logger.info(f"-> Benutzer wählte: {menu_name} ({menu_choice})")
 
 
 def log_task_completed(task_name, details=""):
@@ -115,7 +115,7 @@ def log_task_completed(task_name, details=""):
     _session_stats["completed_tasks"].append(f"{task_name}: {details}" if details else task_name)
     
     logger = logging.getLogger("install")
-    logger.info(f"✓ Task abgeschlossen: {task_name}" + (f" - {details}" if details else ""))
+    logger.info(f"[OK] Task abgeschlossen: {task_name}" + (f" - {details}" if details else ""))
 
 
 def log_task_skipped(task_name, reason=""):
@@ -137,10 +137,10 @@ def log_error(module_name, error_msg, exception=None):
     
     if exception:
         error_logger.error(f"[{module_name}] {error_msg}", exc_info=exception)
-        install_logger.error(f"✗ FEHLER in {module_name}: {error_msg} (siehe error.log)")
+        install_logger.error(f"[Err] FEHLER in {module_name}: {error_msg} (siehe error.log)")
     else:
         error_logger.error(f"[{module_name}] {error_msg}")
-        install_logger.error(f"✗ FEHLER in {module_name}: {error_msg}")
+        install_logger.error(f"[Err] FEHLER in {module_name}: {error_msg}")
 
 
 def log_warning(module_name, warning_msg):
@@ -149,7 +149,7 @@ def log_warning(module_name, warning_msg):
     _session_stats["warnings"].append(f"{module_name}: {warning_msg}")
     
     logger = logging.getLogger("install")
-    logger.warning(f"⚠ [{module_name}] {warning_msg}")
+    logger.warning(f"[!] [{module_name}] {warning_msg}")
 
 
 def print_installation_summary():
@@ -162,7 +162,7 @@ def print_installation_summary():
     
     # Menu-Aktionen
     if _session_stats["completed_tasks"]:
-        summary += f"✓ Abgeschlossene Tasks ({len(_session_stats['completed_tasks'])}):\n"
+        summary += f"[OK] Abgeschlossene Tasks ({len(_session_stats['completed_tasks'])}):\n"
         for task in _session_stats["completed_tasks"]:
             summary += f"  • {task}\n"
         summary += "\n"
@@ -174,13 +174,13 @@ def print_installation_summary():
         summary += "\n"
     
     if _session_stats["warnings"]:
-        summary += f"⚠ Warnungen ({len(_session_stats['warnings'])}):\n"
+        summary += f"[!] Warnungen ({len(_session_stats['warnings'])}):\n"
         for warn in _session_stats["warnings"]:
             summary += f"  • {warn}\n"
         summary += "\n"
     
     if _session_stats["errors"]:
-        summary += f"✗ Fehler ({len(_session_stats['errors'])}):\n"
+        summary += f"[Err] Fehler ({len(_session_stats['errors'])}):\n"
         for error in _session_stats["errors"]:
             summary += f"  • {error}\n"
         summary += "\n"

@@ -21,23 +21,23 @@ INSTALL_PATH = get_install_path()
 
 def restart_apache():
     """Startet Apache2 neu. Gibt True zurück bei Erfolg."""
-    print("→ Starte Apache2 neu…")
+    print("-> Starte Apache2 neu…")
     try:
         result = run_command("sudo systemctl restart apache2", timeout=10)
         if result['success']:
-            print("✓ Apache2 neugestartet\n")
+            print("[OK] Apache2 neugestartet\n")
             return True
         else:
-            print("⚠ Apache2 Neustart fehlgeschlagen\n")
+            print("[!] Apache2 Neustart fehlgeschlagen\n")
             return False
     except Exception as e:
-        print(f"⚠ Fehler: {e}\n")
+        print(f"[!] Fehler: {e}\n")
         return False
 
 
 def finalize_permissions():
     """Setzt alle Berechtigungen endgültig nach der Installation."""
-    print("\n→ Setze finale Berechtigungen…\n")
+    print("\n-> Setze finale Berechtigungen…\n")
     
     try:
         # Verzeichnis-Rechte
@@ -55,12 +55,12 @@ def finalize_permissions():
         if file_issues:
             fix_file_permissions(file_issues)
         
-        print("✓ Finale Berechtigungen gesetzt.\n")
+        print("[OK] Finale Berechtigungen gesetzt.\n")
         log_task_completed("Finale Berechtigungsprüfung", details="Alle Berechtigungen validiert")
         
     except Exception as e:
         log_error("install_all", f"Fehler bei finalen Berechtigungen: {e}", e)
-        print(f"✗ Fehler bei Berechtigungen: {e}\n")
+        print(f"[Err] Fehler bei Berechtigungen: {e}\n")
         raise
 
 
@@ -87,10 +87,10 @@ def install_all_main():
     possible_config = os.path.join(get_home_dir(), "Install", "e3dc.config.txt")
     use_custom_config = False
     if os.path.exists(possible_config):
-        print(f"ℹ️  Gefunden: {possible_config}")
+        print(f"[i]  Gefunden: {possible_config}")
         if input("  Soll diese Konfigurationsdatei verwendet werden? (j/n): ").strip().lower() == 'j':
             use_custom_config = True
-            print("  ✓ Wird in Schritt 5 integriert.")
+            print("  [OK] Wird in Schritt 5 integriert.")
 
     # VENV Abfrage
     use_venv = True
@@ -140,11 +140,11 @@ def install_all_main():
         if sel == 'n':
             use_venv = False
             venv_name = None
-            print("→ Installation erfolgt systemweit (global).")
+            print("-> Installation erfolgt systemweit (global).")
         else:
             custom = input("Name für venv [.venv_e3dc]: ").strip()
             if custom: venv_name = custom
-            print(f"→ Installation erfolgt im venv ({venv_name}).")
+            print(f"-> Installation erfolgt im venv ({venv_name}).")
 
     # Speichern in Config
     config['venv_name'] = venv_name
@@ -166,7 +166,7 @@ def install_all_main():
 
     confirm = input("\nAlle Schritte ausführen? (j/n): ").strip().lower()
     if confirm != "j":
-        print("→ Abgebrochen.\n")
+        print("-> Abgebrochen.\n")
         return
 
     # Logging für diese "Alles installieren"-Sitzung initialisieren
@@ -179,31 +179,31 @@ def install_all_main():
     print("\n" + "=" * 60)
     print("SCHRITT 1 / 11: Berechtigungen prüfen & korrigieren (Initial)")
     print("=" * 60)
-    print("\n→ Prüfe und korrigiere Berechtigungen…\n")
+    print("\n-> Prüfe und korrigiere Berechtigungen…\n")
     
     # Verzeichnis-Rechte
     dir_issues = check_permissions()
     if dir_issues:
-        print("⚠ Verzeichnis-Berechtigungen werden korrigiert…")
+        print("[!] Verzeichnis-Berechtigungen werden korrigiert…")
         fix_permissions(dir_issues)
     else:
-        print("✓ Verzeichnis-Berechtigungen OK")
+        print("[OK] Verzeichnis-Berechtigungen OK")
     
     # Webportal-Rechte
     wp_issues = check_webportal_permissions()
     if wp_issues:
-        print("⚠ Webportal-Berechtigungen werden korrigiert…")
+        print("[!] Webportal-Berechtigungen werden korrigiert…")
         fix_webportal_permissions(wp_issues)
     else:
-        print("✓ Webportal-Berechtigungen OK")
+        print("[OK] Webportal-Berechtigungen OK")
     
     # Datei-Rechte (nur vorhandene Dateien prüfen)
     file_issues = check_file_permissions()
     if file_issues:
-        print("⚠ Datei-Berechtigungen werden korrigiert…")
+        print("[!] Datei-Berechtigungen werden korrigiert…")
         fix_file_permissions(file_issues)
     else:
-        print("✓ Datei-Berechtigungen OK\n")
+        print("[OK] Datei-Berechtigungen OK\n")
 
     # =========================================================
     # SCHRITT 2: Systempakete
@@ -218,7 +218,7 @@ def install_all_main():
     print("\n" + "=" * 60)
     if not safe_execute_task("SCHRITT 3/11: E3DC-Control klonen & kompilieren", install_e3dc_control):
         failed_steps.append("E3DC-Control")
-        print("\n✗ Kritischer Fehler: E3DC-Control konnte nicht installiert werden. Installation wird abgebrochen.\n")
+        print("\n[Err] Kritischer Fehler: E3DC-Control konnte nicht installiert werden. Installation wird abgebrochen.\n")
         print_installation_summary()
         return
 
@@ -241,17 +241,17 @@ def install_all_main():
     print("\n" + "=" * 60)
     def create_configs_task():
         if use_custom_config:
-            print(f"→ Kopiere vorhandene Konfiguration von {possible_config}...")
+            print(f"-> Kopiere vorhandene Konfiguration von {possible_config}...")
             try:
                 shutil.copy2(possible_config, os.path.join(INSTALL_PATH, "e3dc.config.txt"))
                 uid, _ = get_user_ids()
                 os.chown(os.path.join(INSTALL_PATH, "e3dc.config.txt"), uid, get_www_data_gid())
                 os.chmod(os.path.join(INSTALL_PATH, "e3dc.config.txt"), 0o664)
                 log_task_completed("Konfiguration kopiert", details=possible_config)
-                print("✓ Konfiguration kopiert.")
+                print("[OK] Konfiguration kopiert.")
             except Exception as e:
                 log_error("install_all", f"Fehler beim Kopieren der Config: {e}", e)
-                print(f"✗ Fehler beim Kopieren: {e}")
+                print(f"[Err] Fehler beim Kopieren: {e}")
                 create_e3dc_config() # Fallback
         else:
             create_e3dc_config(skip_copy_prompt=True)
@@ -267,10 +267,10 @@ def install_all_main():
                 os.chown(wallbox_file, uid, get_www_data_gid())
                 os.chmod(wallbox_file, 0o664)
                 log_task_completed("Leere Wallbox-Datei erstellt", details=wallbox_file)
-                print(f"✓ Wallbox-Datei erstellt: {wallbox_file}\n")
+                print(f"[OK] Wallbox-Datei erstellt: {wallbox_file}\n")
             except Exception as e:
                 log_warning("install_all", f"Leere Wallbox-Datei konnte nicht erstellt werden: {e}")
-                print(f"⚠ Wallbox-Datei konnte nicht erstellt werden: {e}\n")
+                print(f"[!] Wallbox-Datei konnte nicht erstellt werden: {e}\n")
 
     if not safe_execute_task("SCHRITT 5/11: E3DC-Konfiguration erstellen", create_configs_task):
         failed_steps.append("Konfiguration")
@@ -290,7 +290,7 @@ def install_all_main():
             log_error("Strompreis-Wizard", f"Fehler bei der Strompreis-Konfiguration: {e}", e)
             failed_steps.append("Strompreise")
     else:
-        print("→ Übersprungen (kann später hinzugefügt werden).\n")
+        print("-> Übersprungen (kann später hinzugefügt werden).\n")
 
     # =========================================================
     # SCHRITT 7: Service (Systemd)
@@ -310,7 +310,7 @@ def install_all_main():
     print("\n" + "=" * 60)
     print("SCHRITT 9 / 11: Berechtigungen verifizieren & final setzen")
     print("=" * 60)
-    print("\n→ Verifiziere alle Berechtigungen nach der Installation…\n")
+    print("\n-> Verifiziere alle Berechtigungen nach der Installation…\n")
     finalize_permissions()
 
     # =========================================================
@@ -333,11 +333,11 @@ def install_all_main():
 
     print("Nächste Schritte:")
     print("  1. Webportal öffnen:")
-    print("     → http://localhost oder http://<PI-IP>\n")
+    print("     -> http://localhost oder http://<PI-IP>\n")
     print("  2. E3DC-Control starten:")
-    print("     → Mit 'screen -r E3DC' überprüfen (läuft bei Reboot automatisch)\n")
+    print("     -> Mit 'screen -r E3DC' überprüfen (läuft bei Reboot automatisch)\n")
     print("  3. Dokumentation:")
-    print("     → Weitere Infos findest du im Ordner 'Install/doc' (z.B. zu Watchdog, Venv).\n")
+    print("     -> Weitere Infos findest du im Ordner 'Install/doc' (z.B. zu Watchdog, Venv).\n")
 
 
 register_command("18", "Alles installieren", install_all_main, sort_order=180)

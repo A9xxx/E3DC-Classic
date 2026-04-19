@@ -31,7 +31,7 @@ def _normalize_numeric_input(value):
 def load_config():
     """Lädt die Konfigurationsdatei."""
     if not os.path.exists(CONFIG_FILE):
-        print(f"✗ Konfigurationsdatei nicht gefunden: {CONFIG_FILE}")
+        print(f"[Err] Konfigurationsdatei nicht gefunden: {CONFIG_FILE}")
         config_logger.warning(f"Konfigurationsdatei nicht gefunden: {CONFIG_FILE}")
         return {}
 
@@ -48,7 +48,7 @@ def load_config():
                         continue
         return config
     except Exception as e:
-        print(f"✗ Fehler beim Lesen der Datei: {e}")
+        print(f"[Err] Fehler beim Lesen der Datei: {e}")
         log_error("config", f"Fehler beim Lesen der Konfigurationsdatei: {e}", e)
         return {}
 
@@ -56,7 +56,7 @@ def load_config():
 def save_param(key, value):
     """Speichert einen Parameter in der Konfigurationsdatei."""
     if not os.path.exists(CONFIG_FILE):
-        print(f"✗ Konfigurationsdatei nicht vorhanden: {CONFIG_FILE}")
+        print(f"[Err] Konfigurationsdatei nicht vorhanden: {CONFIG_FILE}")
         return False
 
     normalized, changed = _normalize_numeric_input(value)
@@ -79,7 +79,7 @@ def config_wizard():
 
     config = load_config()
     if not config:
-        print("✗ Keine Konfiguration geladen.\n")
+        print("[Err] Keine Konfiguration geladen.\n")
         return
 
     print("Aktuelle Parameter:\n")
@@ -93,16 +93,16 @@ def config_wizard():
         new_val = input(f"  {key} [{config[key]}]: ").strip()
         if new_val:
             if save_param(key, new_val):
-                print(f"  ✓ {key} aktualisiert")
+                print(f"  [OK] {key} aktualisiert")
                 updated = True
             else:
-                print(f"  ✗ Fehler bei {key}")
+                print(f"  [Err] Fehler bei {key}")
 
     if updated:
-        print("\n✓ Konfiguration aktualisiert.\n")
+        print("\n[OK] Konfiguration aktualisiert.\n")
         log_task_completed("Konfiguration aktualisiert")
     else:
-        print("\n→ Keine Änderungen gemacht.\n")
+        print("\n-> Keine Änderungen gemacht.\n")
         config_logger.info("Keine Änderungen an der Konfiguration vorgenommen.")
 
 

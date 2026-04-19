@@ -29,31 +29,31 @@ def setup_venv(show_header=False):
     old_venv_path = os.path.join(INSTALL_PATH, venv_name)
     if os.path.exists(old_venv_path) and os.path.isdir(old_venv_path):
         if os.path.abspath(old_venv_path) != os.path.abspath(venv_path):
-            print(f"→ Entferne veraltetes venv: {old_venv_path}")
+            print(f"-> Entferne veraltetes venv: {old_venv_path}")
             try:
                 shutil.rmtree(old_venv_path)
-                print("✓ Altes venv bereinigt.")
+                print("[OK] Altes venv bereinigt.")
             except Exception as e:
-                print(f"⚠ Konnte altes venv nicht löschen: {e}")
+                print(f"[!] Konnte altes venv nicht löschen: {e}")
     
-    print(f"→ Ziel: {venv_path}")
+    print(f"-> Ziel: {venv_path}")
     
     if not os.path.exists(venv_path):
-        print("→ Erstelle venv…")
+        print("-> Erstelle venv…")
         # Erstelle venv mit Zugriff auf System-Pakete (für apt-installierte Module wie RPi.GPIO falls nötig)
         res = run_command(f"sudo -u {install_user} python3 -m venv {venv_path} --system-site-packages")
         if res['success']:
-            print("✓ venv erstellt.")
+            print("[OK] venv erstellt.")
             system_logger.info(f"Virtual Environment erstellt: {venv_path}")
         else:
-            print(f"✗ Fehler beim Erstellen: {res['stderr']}")
+            print(f"[Err] Fehler beim Erstellen: {res['stderr']}")
             return False
     else:
-        print("✓ venv existiert bereits.")
+        print("[OK] venv existiert bereits.")
     
     venv_pip = os.path.join(venv_path, "bin", "pip")
     
-    print("\n→ Installiere Python-Pakete in venv…\n")
+    print("\n-> Installiere Python-Pakete in venv…\n")
     system_logger.info(f"Installiere {len(PYTHON_PACKAGES)} Python-Pakete in {venv_path}.")
     
     for pkg in PYTHON_PACKAGES:
@@ -68,15 +68,15 @@ def setup_venv(show_header=False):
             # Bei Version-Constraint sicherheitshalber install ausführen (Update/Check)
             if any(c in pkg for c in ['>', '=', '<']):
                 run_command(f"sudo -u {install_user} {venv_pip} install {pkg}")
-                print(f"  ✓ {pkg} (geprüft)")
+                print(f"  [OK] {pkg} (geprüft)")
             else:
-                print(f"  ✓ {pkg} bereits installiert")
+                print(f"  [OK] {pkg} bereits installiert")
         else:
-            print(f"  → Installiere {pkg}...")
+            print(f"  -> Installiere {pkg}...")
             run_command(f"sudo -u {install_user} {venv_pip} install {pkg}")
     
     if show_header:
-        print("\n✓ Python-Umgebung eingerichtet.\n")
+        print("\n[OK] Python-Umgebung eingerichtet.\n")
         log_task_completed("Python venv eingerichtet")
     return True
 
@@ -89,19 +89,19 @@ def list_venv_packages():
     venv_pip = os.path.join(get_home_dir(install_user), venv_name, "bin", "pip")
     
     if not os.path.exists(venv_pip):
-        print("✗ Kein venv gefunden.")
+        print("[Err] Kein venv gefunden.")
         return
 
     res = run_command(f"sudo -u {install_user} {venv_pip} list")
     if res['success']:
         print(res['stdout'])
     else:
-        print(f"✗ Fehler: {res['stderr']}")
+        print(f"[Err] Fehler: {res['stderr']}")
     print()
 
 def install_global_python_packages():
     """Installiert Python-Pakete global (System)."""
-    print("\n→ Installiere Python-Pakete systemweit (global)…")
+    print("\n-> Installiere Python-Pakete systemweit (global)…")
     system_logger.info(f"Installiere {len(PYTHON_PACKAGES)} Python-Pakete global.")
     
     for pkg in PYTHON_PACKAGES:
@@ -121,13 +121,13 @@ def install_system_packages(use_venv=True):
         "libsqlite3-dev", "build-essential", "cmake"
     ]
 
-    print("→ Installiere Systempakete…\n")
+    print("-> Installiere Systempakete…\n")
     system_logger.info(f"Installiere {len(packages)} Systempakete.")
     for pkg in packages:
         apt_install(pkg)
 
     # Veraltete lighttpd-Installation entfernen oder deaktivieren, um Port-Konflikte mit Apache2 zu vermeiden
-    print("→ Prüfe auf Konflikte mit lighttpd…")
+    print("-> Prüfe auf Konflikte mit lighttpd…")
     run_command("sudo systemctl stop lighttpd", timeout=10)
     run_command("sudo systemctl disable lighttpd", timeout=10)
     
@@ -141,7 +141,7 @@ def install_system_packages(use_venv=True):
     else:
         install_global_python_packages()
 
-    print("\n✓ Systempakete vollständig installiert.\n")
+    print("\n[OK] Systempakete vollständig installiert.\n")
     system_logger.info("Installation der Pakete abgeschlossen.")
     log_task_completed("Systempakete installieren")
 
@@ -153,7 +153,7 @@ def install_e3dc_control():
 
     # NEU: Prüfen, ob git überhaupt installiert ist
     if not command_exists("git"):
-        print("✗ Git ist nicht installiert. Breche ab.")
+        print("[Err] Git ist nicht installiert. Breche ab.")
         print("  Bitte führe zuerst 'Systempakete installieren' aus.")
         log_error("system", "Git ist nicht installiert. Klonen von E3DC-Control abgebrochen.")
         return False
@@ -162,15 +162,15 @@ def install_e3dc_control():
     temp_venv_backup = None
 
     if os.path.exists(INSTALL_PATH):
-        print("⚠ E3DC-Control existiert bereits.")
+        print("[!] E3DC-Control existiert bereits.")
         choice = input("Überschreiben? (j/n): ").strip().lower()
         if choice != "j":
-            print("→ Schritt übersprungen, verwende vorhandene Installation.\n")
+            print("-> Schritt übersprungen, verwende vorhandene Installation.\n")
             system_logger.warning("Installation von E3DC-Control übersprungen, da Verzeichnis bereits existiert.")
             return True
         
         if os.path.exists("/etc/systemd/system/e3dc.service"):
-            print("→ Stoppe E3DC-Control Service…")
+            print("-> Stoppe E3DC-Control Service…")
             run_command("sudo systemctl stop e3dc")
             service_was_stopped = True
         
@@ -179,25 +179,25 @@ def install_e3dc_control():
         if venv_name:
             possible_venv = os.path.join(INSTALL_PATH, venv_name)
             if os.path.exists(possible_venv) and os.path.isdir(possible_venv):
-                print(f"  ℹ️  Sichere venv vor dem Löschen: {possible_venv}")
+                print(f"  [i]  Sichere venv vor dem Löschen: {possible_venv}")
                 try:
                     temp_venv_backup = os.path.join(tempfile.gettempdir(), f"{venv_name}_backup_{os.getpid()}")
                     if os.path.exists(temp_venv_backup):
                         shutil.rmtree(temp_venv_backup)
                     shutil.move(possible_venv, temp_venv_backup)
                 except Exception as e:
-                    print(f"  ⚠ Konnte venv nicht sichern: {e}")
+                    print(f"  [!] Konnte venv nicht sichern: {e}")
             
-        print("→ Entferne altes Verzeichnis…")
+        print("-> Entferne altes Verzeichnis…")
         try:
             shutil.rmtree(INSTALL_PATH, ignore_errors=True)
             system_logger.info(f"Altes Verzeichnis entfernt: {INSTALL_PATH}")
         except Exception as e:
-            print(f"✗ Fehler beim Löschen: {e}\n")
+            print(f"[Err] Fehler beim Löschen: {e}\n")
             log_error("system", f"Fehler beim Löschen des alten Verzeichnisses: {e}", e)
             return False
 
-    print("→ Klone Repository…")
+    print("-> Klone Repository…")
     install_user = get_install_user()
     result = run_command(
         f"sudo -u {install_user} git clone https://github.com/Eba-M/E3DC-Control.git {INSTALL_PATH}",
@@ -205,7 +205,7 @@ def install_e3dc_control():
     )
 
     if not result['success']:
-        print(f"✗ Git Clone fehlgeschlagen: {result['stderr']}\n")
+        print(f"[Err] Git Clone fehlgeschlagen: {result['stderr']}\n")
         log_error("system", f"Git Clone fehlgeschlagen: {result['stderr']}")
         return False
     system_logger.info("Repository erfolgreich geklont.")
@@ -213,7 +213,7 @@ def install_e3dc_control():
     # VENV WIEDERHERSTELLUNG
     if temp_venv_backup and os.path.exists(temp_venv_backup):
         target_venv = os.path.join(INSTALL_PATH, venv_name)
-        print(f"→ Stelle venv wieder her: {target_venv}")
+        print(f"-> Stelle venv wieder her: {target_venv}")
         try:
             if os.path.exists(target_venv):
                 shutil.rmtree(target_venv)
@@ -222,10 +222,10 @@ def install_e3dc_control():
             # Rechte sicherstellen (install_user)
             run_command(f"chown -R {install_user}:{install_user} {target_venv}")
         except Exception as e:
-            print(f"  ⚠ Konnte venv nicht wiederherstellen: {e}")
+            print(f"  [!] Konnte venv nicht wiederherstellen: {e}")
             log_error("system", f"Konnte venv nicht wiederherstellen: {e}", e)
 
-    print("→ Kompiliere…")
+    print("-> Kompiliere…")
     # Venv nutzen falls vorhanden
     venv_name = get_venv_name()
     venv_act = os.path.join(INSTALL_PATH, venv_name, "bin", "activate") if venv_name else ""
@@ -236,7 +236,7 @@ def install_e3dc_control():
     result = run_command(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && {make_cmd}'", timeout=300)
 
     if not result['success']:
-        print(f"✗ Kompilierung fehlgeschlagen: {result['stderr']}\n")
+        print(f"[Err] Kompilierung fehlgeschlagen: {result['stderr']}\n")
         log_error("system", f"Kompilierung fehlgeschlagen: {result['stderr']}")
         return False
     system_logger.info("Kompilierung erfolgreich.")
@@ -249,10 +249,10 @@ def install_e3dc_control():
         pass
 
     if service_was_stopped:
-        print("→ Starte E3DC-Control Service…")
+        print("-> Starte E3DC-Control Service…")
         run_command("sudo systemctl start e3dc")
 
-    print("✓ E3DC-Control installiert.\n")
+    print("[OK] E3DC-Control installiert.\n")
     log_task_completed("E3DC-Control installieren")
     return True
 

@@ -31,12 +31,12 @@ def copy_existing_config():
     source_path = ask("Pfad zur vorhandenen e3dc.config.txt", default_source)
     
     if not os.path.exists(source_path):
-        print(f"✗ Datei nicht gefunden: {source_path}")
+        print(f"[Err] Datei nicht gefunden: {source_path}")
         log_warning("create_config", f"Zu kopierende Konfigurationsdatei nicht gefunden: {source_path}")
         return False
     
     if not os.path.isfile(source_path):
-        print(f"✗ Kein gültiger Dateipfad: {source_path}")
+        print(f"[Err] Kein gültiger Dateipfad: {source_path}")
         log_warning("create_config", f"Ungültiger Pfad für Konfigurationsdatei angegeben: {source_path}")
         return False
     
@@ -47,28 +47,28 @@ def copy_existing_config():
         # Datei kopieren
         if os.path.abspath(source_path) != os.path.abspath(CONFIG_FILE):
                 shutil.copy2(source_path, CONFIG_FILE)
-                print(f"✓ Datei kopiert: {source_path} → {CONFIG_FILE}")
+                print(f"[OK] Datei kopiert: {source_path} -> {CONFIG_FILE}")
                 config_logger.info(f"Konfigurationsdatei kopiert von {source_path} nach {CONFIG_FILE}")
         else:
-                print("✓ Datei bereits am Zielort vorhanden (kein Kopieren nötig).")
+                print("[OK] Datei bereits am Zielort vorhanden (kein Kopieren nötig).")
         
         # Berechtigungen setzen
         try:
             uid, _ = get_user_ids()
             os.chown(CONFIG_FILE, uid, get_www_data_gid())
             os.chmod(CONFIG_FILE, 0o664)  # rw-rw-r--
-            print(f"✓ Berechtigungen gesetzt (664, Besitzer: UID {uid})")
+            print(f"[OK] Berechtigungen gesetzt (664, Besitzer: UID {uid})")
             config_logger.info(f"Berechtigungen für {CONFIG_FILE} gesetzt.")
         except Exception as e:
-            print(f"⚠ Warnung: Berechtigungen konnten nicht vollständig gesetzt werden: {e}")
+            print(f"[!] Warnung: Berechtigungen konnten nicht vollständig gesetzt werden: {e}")
             log_warning("create_config", f"Berechtigungen für kopierte Konfigurationsdatei konnten nicht gesetzt werden: {e}")
         
-        print(f"\n✓ Konfiguration erfolgreich kopiert und installiert!\n")
+        print(f"\n[OK] Konfiguration erfolgreich kopiert und installiert!\n")
         log_task_completed("Konfiguration erstellen", details="Vorhandene Konfiguration kopiert")
         return True
         
     except Exception as e:
-        print(f"✗ Fehler beim Kopieren der Datei: {e}")
+        print(f"[Err] Fehler beim Kopieren der Datei: {e}")
         log_error("create_config", f"Fehler beim Kopieren der Konfigurationsdatei: {e}", e)
         return False
 
@@ -243,7 +243,7 @@ def create_e3dc_config(skip_copy_prompt=False):
     # DATEI SCHREIBEN
     # =========================================================
     write_e3dc_config(cfg)
-    print(f"\n✓ Konfiguration gespeichert unter {CONFIG_FILE}\n")
+    print(f"\n[OK] Konfiguration gespeichert unter {CONFIG_FILE}\n")
     log_task_completed("Konfiguration erstellen", details="Manuell über Wizard erstellt")
 
 
@@ -335,13 +335,13 @@ def write_e3dc_config(cfg):
             os.chmod(CONFIG_FILE, 0o664)      # rw-rw-r-- damit PHP schreiben kann
             config_logger.info(f"Berechtigungen für {CONFIG_FILE} gesetzt.")
         except Exception as e:
-            print(f"⚠ Warnung: Berechtigungen konnten nicht vollständig gesetzt werden: {e}")
+            print(f"[!] Warnung: Berechtigungen konnten nicht vollständig gesetzt werden: {e}")
             log_warning("create_config", f"Berechtigungen für {CONFIG_FILE} konnten nicht gesetzt werden: {e}")
             pass
 
         return True
     except Exception as e:
-        print(f"✗ Fehler beim Schreiben der Konfiguration: {e}")
+        print(f"[Err] Fehler beim Schreiben der Konfiguration: {e}")
         log_error("create_config", f"Fehler beim Schreiben der Konfigurationsdatei: {e}", e)
         return False
 

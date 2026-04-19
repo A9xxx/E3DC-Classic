@@ -8,11 +8,11 @@ handleServiceRestart();
 handleWatchdogStatus();
 handleWatchdogLog();
 handleSaveSetting();
-handleStatus();
-handleRunNow();
-handleRunLiveHistory();
+// handleStatus();
+// handleRunNow();
+// handleRunLiveHistory();
 handleRunUpdate();
-handleArchivDiagram();
+// handleArchivDiagram();
 require_once 'logic.php';
 $seite = $_GET['seite'] ?? 'dashboard';
 

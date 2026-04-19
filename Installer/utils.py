@@ -90,38 +90,38 @@ def write_param(f, key, value, enabled=True):
 
 def apt_install(pkg):
     """Installiert apt-Paket wenn nicht vorhanden."""
-    print(f"→ Prüfe {pkg}…")
+    print(f"-> Prüfe {pkg}…")
     result = subprocess.run(
         f"dpkg -s {pkg}",
         shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
     if result.returncode != 0:
-        print(f"→ Installiere {pkg}…")
+        print(f"-> Installiere {pkg}…")
         cmd_result = run_command(f"sudo apt-get install -y {pkg}", timeout=300)
         if cmd_result['success']:
-            print(f"✓ {pkg} installiert.")
+            print(f"[OK] {pkg} installiert.")
         else:
-            print(f"⚠ {pkg} möglicherweise nicht korrekt installiert.")
+            print(f"[!] {pkg} möglicherweise nicht korrekt installiert.")
     else:
-        print(f"✓ {pkg} bereits installiert.")
+        print(f"[OK] {pkg} bereits installiert.")
 
 
 def pip_install(pkg):
     """Installiert Python-Paket wenn nicht vorhanden."""
-    print(f"→ Prüfe Python-Paket {pkg}…")
+    print(f"-> Prüfe Python-Paket {pkg}…")
     result = subprocess.run(
         f"pip3 show {pkg}",
         shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
     if result.returncode != 0:
-        print(f"→ Installiere {pkg}…")
+        print(f"-> Installiere {pkg}…")
         cmd_result = run_command(f"sudo pip3 install {pkg} --break-system-packages", timeout=60)
         if cmd_result['success']:
-            print(f"✓ {pkg} installiert.")
+            print(f"[OK] {pkg} installiert.")
         else:
-            print(f"⚠ {pkg} möglicherweise nicht korrekt installiert.")
+            print(f"[!] {pkg} möglicherweise nicht korrekt installiert.")
     else:
-        print(f"✓ {pkg} bereits installiert.")
+        print(f"[OK] {pkg} bereits installiert.")
 
 
 def ensure_dir(path):

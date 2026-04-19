@@ -30,7 +30,7 @@ def validate_ip(ip):
 
 def test_socket_connection(ip, port):
     """Testet die Socket-Verbindung (TCP)."""
-    print(f"\n→ Teste TCP-Verbindung zu {ip}:{port}…")
+    print(f"\n-> Teste TCP-Verbindung zu {ip}:{port}…")
     
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,10 +39,10 @@ def test_socket_connection(ip, port):
         sock.close()
         
         if result == 0:
-            print(f"✓ TCP-Verbindung erfolgreich!")
+            print(f"[OK] TCP-Verbindung erfolgreich!")
             return True
         else:
-            print(f"✗ Keine TCP-Verbindung möglich!")
+            print(f"[Err] Keine TCP-Verbindung möglich!")
             print(f"  Überprüfe:")
             print(f"  - IP-Adresse: {ip}")
             print(f"  - Port: {port}")
@@ -50,24 +50,24 @@ def test_socket_connection(ip, port):
             print(f"  - Firewall-Einstellungen")
             return False
     except socket.gaierror:
-        print(f"✗ Fehler: Hostname '{ip}' konnte nicht aufgelöst werden!")
+        print(f"[Err] Fehler: Hostname '{ip}' konnte nicht aufgelöst werden!")
         return False
     except socket.error as e:
-        print(f"✗ Socket-Fehler: {e}")
+        print(f"[Err] Socket-Fehler: {e}")
         return False
     except Exception as e:
-        print(f"✗ Fehler: {e}")
+        print(f"[Err] Fehler: {e}")
         return False
 
 
 def test_mqtt_connection(ip, port, topic=None, timeout=5):
     """Testet die MQTT-Verbindung und empfängt optional Messages."""
-    print(f"\n→ Teste MQTT-Verbindung zu {ip}:{port}…")
+    print(f"\n-> Teste MQTT-Verbindung zu {ip}:{port}…")
     
     try:
         import paho.mqtt.client as mqtt
     except ImportError:
-        print("✗ Fehler: paho-mqtt ist nicht installiert!")
+        print("[Err] Fehler: paho-mqtt ist nicht installiert!")
         print("  Installiere mit: sudo apt-get install -y python3-paho-mqtt")
         return False
     
@@ -79,12 +79,12 @@ def test_mqtt_connection(ip, port, topic=None, timeout=5):
         nonlocal connected
         if rc == 0:
             connected = True
-            print(f"✓ Mit MQTT Broker verbunden!")
+            print(f"[OK] Mit MQTT Broker verbunden!")
             if topic:
-                print(f"→ Abonniere Topic: {topic}")
+                print(f"-> Abonniere Topic: {topic}")
                 client.subscribe(topic)
         else:
-            print(f"✗ Verbindungsfehler: Returncode {rc}")
+            print(f"[Err] Verbindungsfehler: Returncode {rc}")
             error_messages = {
                 1: "Ungültige Protokollversion",
                 2: "Ungültige Client ID",
@@ -101,14 +101,14 @@ def test_mqtt_connection(ip, port, topic=None, timeout=5):
             'qos': msg.qos,
             'retain': msg.retain
         })
-        print(f"✓ Message empfangen:")
+        print(f"[OK] Message empfangen:")
         print(f"  Topic: {msg.topic}")
         print(f"  Payload: {msg.payload.decode('utf-8')}")
         print(f"  QoS: {msg.qos}, Retain: {msg.retain}")
     
     def on_disconnect(client, userdata, rc):
         if rc != 0:
-            print(f"⚠ Unerwartete Trennung: {rc}")
+            print(f"[!] Unerwartete Trennung: {rc}")
     
     # Erstelle Client
     try:
@@ -118,7 +118,7 @@ def test_mqtt_connection(ip, port, topic=None, timeout=5):
         client.on_disconnect = on_disconnect
         
         # Verbinde
-        print(f"→ Verbinde zu {ip}:{port}…")
+        print(f"-> Verbinde zu {ip}:{port}…")
         client.connect(ip, int(port), keepalive=10)
         
         # Starte Loop mit Timeout
@@ -131,19 +131,19 @@ def test_mqtt_connection(ip, port, topic=None, timeout=5):
             wait_time += 0.5
         
         if not connected:
-            print(f"✗ Verbindung zum MQTT Broker fehlgeschlagen!")
+            print(f"[Err] Verbindung zum MQTT Broker fehlgeschlagen!")
             client.loop_stop()
             return False
         
         # Warte auf Messages (wenn Topic angegeben)
         if topic:
-            print(f"→ Warte {timeout-1} Sekunden auf Messages…")
+            print(f"-> Warte {timeout-1} Sekunden auf Messages…")
             time.sleep(timeout - 1)
             
             if messages:
-                print(f"\n✓ {len(messages)} Message(s) empfangen!")
+                print(f"\n[OK] {len(messages)} Message(s) empfangen!")
             else:
-                print(f"⚠ Keine Messages empfangen.")
+                print(f"[!] Keine Messages empfangen.")
                 print(f"  Prüfe ob das Topic '{topic}' korrekt ist.")
         
         client.loop_stop()
@@ -151,10 +151,10 @@ def test_mqtt_connection(ip, port, topic=None, timeout=5):
         return True
     
     except connectivity.error.BrokerConnectError:
-        print(f"✗ Fehler: Kann sich nicht mit dem Broker verbinden!")
+        print(f"[Err] Fehler: Kann sich nicht mit dem Broker verbinden!")
         return False
     except Exception as e:
-        print(f"✗ Fehler: {e}")
+        print(f"[Err] Fehler: {e}")
         return False
 
 
@@ -169,7 +169,7 @@ def get_test_config():
         ip = input("IP-Adresse des MQTT Brokers (z.B. 192.168.178.100): ").strip()
         if validate_ip(ip):
             break
-        print("✗ Ungültige IP-Adresse! Bitte versuche es erneut.")
+        print("[Err] Ungültige IP-Adresse! Bitte versuche es erneut.")
     
     # Port
     port = input("MQTT Port (Standard: 1883) [Enter für Standard]: ").strip()
@@ -179,7 +179,7 @@ def get_test_config():
     try:
         int(port)
     except ValueError:
-        print("✗ Port muss eine Zahl sein! Nutze Standard: 1883")
+        print("[Err] Port muss eine Zahl sein! Nutze Standard: 1883")
         port = "1883"
     
     # Topic (optional)
@@ -204,7 +204,7 @@ def main():
     else:
         ip, port, topic = get_test_config()
     
-    print(f"\n→ Teste MQTT-Verbindung:")
+    print(f"\n-> Teste MQTT-Verbindung:")
     print(f"  IP: {ip}")
     print(f"  Port: {port}")
     if topic:
@@ -212,17 +212,17 @@ def main():
     
     # Socket-Test
     if not test_socket_connection(ip, port):
-        print("\n✗ TCP-Verbindung fehlgeschlagen!")
-        print("→ MQTT-Test aus Sicherheitsgründen übersprungen.\n")
+        print("\n[Err] TCP-Verbindung fehlgeschlagen!")
+        print("-> MQTT-Test aus Sicherheitsgründen übersprungen.\n")
         sys.exit(1)
     
     # MQTT-Test
     if not test_mqtt_connection(ip, port, topic):
-        print("\n✗ MQTT-Verbindung fehlgeschlagen!\n")
+        print("\n[Err] MQTT-Verbindung fehlgeschlagen!\n")
         sys.exit(1)
     
     print("\n" + "="*50)
-    print("✓ Alle Tests erfolgreich!")
+    print("[OK] Alle Tests erfolgreich!")
     print("="*50 + "\n")
     sys.exit(0)
 
@@ -231,10 +231,10 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n✗ Test unterbrochen.\n")
+        print("\n\n[Err] Test unterbrochen.\n")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ Fehler: {e}\n")
+        print(f"\n[Err] Fehler: {e}\n")
         import traceback
         traceback.print_exc()
         sys.exit(1)

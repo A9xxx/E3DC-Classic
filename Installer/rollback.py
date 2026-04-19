@@ -15,7 +15,7 @@ rollback_logger = get_or_create_logger("rollback")
 
 def hard_stop_e3dc():
     """Stoppt E3DC-Control vollständig."""
-    print("→ Stoppe E3DC-Control vollständig…")
+    print("-> Stoppe E3DC-Control vollständig…")
     rollback_logger.info("Starte hard_stop_e3dc")
 
     try:
@@ -42,56 +42,56 @@ def hard_stop_e3dc():
             run_command(cmd, timeout=5)
         
         time.sleep(1.5)
-        print("✓ E3DC-Control gestoppt")
+        print("[OK] E3DC-Control gestoppt")
         rollback_logger.info("E3DC-Control erfolgreich gestoppt.")
         return True
     except Exception as e:
-        print(f"⚠ Fehler beim Stoppen: {e}")
+        print(f"[!] Fehler beim Stoppen: {e}")
         log_error("rollback", f"Fehler beim Stoppen von E3DC-Control: {e}", e)
         return False
 
 
 def start_e3dc():
     """Startet E3DC-Control."""
-    print("→ Starte E3DC-Control…")
+    print("-> Starte E3DC-Control…")
     rollback_logger.info("Starte E3DC-Control")
     
     # NEU: Systemd Service nutzen falls vorhanden
     if os.path.exists("/etc/systemd/system/e3dc.service"):
         res = run_command("sudo systemctl start e3dc", timeout=10)
         if res['success']:
-            print("✓ E3DC-Control Service gestartet")
+            print("[OK] E3DC-Control Service gestartet")
             return True
         else:
-            print(f"⚠ Fehler beim Starten des Services: {res['stderr']}")
+            print(f"[!] Fehler beim Starten des Services: {res['stderr']}")
     
     install_user = get_install_user()
     result = run_command(f"sudo -u {install_user} screen -dmS E3DC {INSTALL_PATH}/E3DC.sh", timeout=5)
     
     if result['success']:
-        print("✓ E3DC-Control gestartet (Legacy)")
+        print("[OK] E3DC-Control gestartet (Legacy)")
         return True
     else:
-        print("⚠ Warnung: E3DC-Control konnte nicht gestartet werden")
+        print("[!] Warnung: E3DC-Control konnte nicht gestartet werden")
         log_warning("rollback", f"E3DC-Control konnte nicht gestartet werden: {result['stderr']}")
         return False
 
 
 def rollback(backup_dir):
     """Kompletter Rollback-Prozess vom Backup."""
-    print(f"\n→ Rollback von {os.path.basename(backup_dir)}…\n")
+    print(f"\n-> Rollback von {os.path.basename(backup_dir)}…\n")
     rollback_logger.info(f"Starte Rollback von Backup: {os.path.basename(backup_dir)}")
 
     # Sicherheits-Backup erstellen
-    print("→ Erstelle Sicherheits-Backup vor dem Überschreiben…")
+    print("-> Erstelle Sicherheits-Backup vor dem Überschreiben…")
     try:
         backup_current_version()
     except Exception as e:
-        print(f"⚠ Warnung: Sicherheits-Backup konnte nicht erstellt werden: {e}")
+        print(f"[!] Warnung: Sicherheits-Backup konnte nicht erstellt werden: {e}")
         rollback_logger.warning(f"Sicherheits-Backup vor Rollback fehlgeschlagen: {e}")
 
     if not hard_stop_e3dc():
-        print("✗ Konnte E3DC nicht stoppen – Rollback abgebrochen")
+        print("[Err] Konnte E3DC nicht stoppen – Rollback abgebrochen")
         log_error("rollback", "Konnte E3DC nicht stoppen, Rollback abgebrochen.")
         return False
 
@@ -99,7 +99,7 @@ def rollback(backup_dir):
 
     if success:
         # Berechtigungen nach Backup-Restore korrigieren
-        print("\n→ Korrigiere Berechtigungen nach Wiederherstellung…")
+        print("\n-> Korrigiere Berechtigungen nach Wiederherstellung…")
         rollback_logger.info("Korrigiere Berechtigungen nach Wiederherstellung.")
         from .permissions import run_permissions_wizard
         run_permissions_wizard()
@@ -112,10 +112,10 @@ def rollback(backup_dir):
     start_e3dc()
 
     if success:
-        print("\n✓ Rollback abgeschlossen.\n")
+        print("\n[OK] Rollback abgeschlossen.\n")
         log_task_completed("Rollback (Backup)", details=f"Von {os.path.basename(backup_dir)}")
     else:
-        print("\n⚠ Rollback mit Problemen abgeschlossen.\n")
+        print("\n[!] Rollback mit Problemen abgeschlossen.\n")
         log_error("rollback", f"Rollback von Backup {os.path.basename(backup_dir)} mit Problemen abgeschlossen.")
     
     return success
@@ -154,7 +154,7 @@ def choose_commit():
     commits = get_last_commits()
 
     if not commits:
-        print("✗ Konnte keine Commits abrufen.")
+        print("[Err] Konnte keine Commits abrufen.")
         rollback_logger.warning("Konnte keine Commits für Commit-Rollback abrufen.")
         return None
 
@@ -168,7 +168,7 @@ def choose_commit():
     choice = input("Welche Version installieren? (Nummer): ").strip()
 
     if not choice.isdigit():
-        print("✗ Ungültige Eingabe.\n")
+        print("[Err] Ungültige Eingabe.\n")
         return None
 
     try:
@@ -176,36 +176,36 @@ def choose_commit():
         if idx == 0:
             return None
         if idx < 1 or idx > len(commits):
-            print("✗ Ungültige Auswahl.\n")
+            print("[Err] Ungültige Auswahl.\n")
             return None
         return commits[idx - 1][0]
     except (ValueError, IndexError):
-        print("✗ Fehler bei der Auswahl.\n")
+        print("[Err] Fehler bei der Auswahl.\n")
         return None
 
 
 def rollback_to_commit(commit_hash):
     """Rollback auf bestimmten Commit."""
-    print(f"\n→ Rollback auf {commit_hash}…\n")
+    print(f"\n-> Rollback auf {commit_hash}…\n")
     rollback_logger.info(f"Starte Rollback zu Commit: {commit_hash}")
 
     # Sicherheits-Backup erstellen
-    print("→ Erstelle Sicherheits-Backup vor dem Git-Reset…")
+    print("-> Erstelle Sicherheits-Backup vor dem Git-Reset…")
     try:
         backup_current_version()
     except Exception as e:
-        print(f"⚠ Warnung: Sicherheits-Backup konnte nicht erstellt werden: {e}")
+        print(f"[!] Warnung: Sicherheits-Backup konnte nicht erstellt werden: {e}")
         rollback_logger.warning(f"Sicherheits-Backup vor Commit-Rollback fehlgeschlagen: {e}")
 
     # Git Reset
     result = run_command(f"cd {INSTALL_PATH} && git reset --hard {commit_hash}")
     if not result['success']:
-        print(f"✗ Git Reset fehlgeschlagen")
+        print(f"[Err] Git Reset fehlgeschlagen")
         log_error("rollback", f"Git Reset auf {commit_hash} fehlgeschlagen.", result['stderr'])
         return False
 
     # Kompilierung
-    print("→ Kompiliere…")
+    print("-> Kompiliere…")
     install_user = get_install_user()
     
     venv_name = load_config().get("venv_name", ".venv_e3dc")
@@ -217,12 +217,12 @@ def rollback_to_commit(commit_hash):
         
     result = run_command(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && {make_cmd}'", timeout=300)
     if not result['success']:
-        print(f"✗ Kompilierung fehlgeschlagen")
+        print(f"[Err] Kompilierung fehlgeschlagen")
         log_error("rollback", f"Kompilierung nach Rollback auf {commit_hash} fehlgeschlagen.", result['stderr'])
         return False
 
     # Berechtigungen korrigieren
-    print("\n→ Korrigiere Berechtigungen nach Rollback…")
+    print("\n-> Korrigiere Berechtigungen nach Rollback…")
     rollback_logger.info("Korrigiere Berechtigungen nach Commit-Rollback.")
     from .permissions import run_permissions_wizard
     run_permissions_wizard()
@@ -234,7 +234,7 @@ def rollback_to_commit(commit_hash):
         time.sleep(5)
         replace_in_file(config_file, "stop", "stop = 0")
 
-    print("✓ Rollback abgeschlossen.\n")
+    print("[OK] Rollback abgeschlossen.\n")
     log_task_completed("Rollback (Commit)", details=f"Zu Commit {commit_hash}")
     return True
 
@@ -246,20 +246,20 @@ def rollback_to_commit_hash():
     commit = input("Commit-Hash eingeben (oder leer zum Abbrechen): ").strip()
 
     if not commit:
-        print("→ Abgebrochen.\n")
+        print("-> Abgebrochen.\n")
         return
 
     # Validiere Commit
     result = run_command(f"cd {INSTALL_PATH} && git cat-file -t {commit}")
 
     if not result['success']:
-        print("✗ Ungültige oder nicht existierende Commit-Kennung.\n")
+        print("[Err] Ungültige oder nicht existierende Commit-Kennung.\n")
         log_warning("rollback", f"Ungültiger Commit-Hash für Rollback eingegeben: {commit}")
         return
 
     confirm = input(f"Rollback zu {commit}? (j/n): ").strip().lower()
     if confirm != "j":
-        print("→ Abgebrochen.\n")
+        print("-> Abgebrochen.\n")
         return
 
     rollback_to_commit(commit)

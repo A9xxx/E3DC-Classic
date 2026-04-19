@@ -42,7 +42,7 @@ def remove_cron_pattern(pattern):
 
 def uninstall_watchdog():
     """Entfernt Watchdog (Service, Skripte, Cron)."""
-    print("\n→ Entferne Watchdog (Piguard)…")
+    print("\n-> Entferne Watchdog (Piguard)…")
     
     # Service stoppen und entfernen
     run_command("sudo systemctl stop piguard", timeout=10)
@@ -50,24 +50,24 @@ def uninstall_watchdog():
     if os.path.exists("/etc/systemd/system/piguard.service"):
         os.remove("/etc/systemd/system/piguard.service")
         run_command("sudo systemctl daemon-reload")
-        print("  ✓ Service entfernt")
+        print("  [OK] Service entfernt")
 
     # Skripte entfernen
     for f in ["/usr/local/bin/pi_guard.sh", "/usr/local/bin/boot_notify.sh"]:
         if os.path.exists(f):
             os.remove(f)
-            print(f"  ✓ {f} gelöscht")
+            print(f"  [OK] {f} gelöscht")
 
     # Cronjobs entfernen
     if remove_cron_pattern("boot_notify.sh"):
-        print("  ✓ Cronjobs bereinigt")
+        print("  [OK] Cronjobs bereinigt")
     
     uninstall_logger.info("Watchdog deinstalliert.")
     log_task_completed("Deinstallation (Watchdog)")
 
 def uninstall_ramdisk():
     """Entfernt RAM-Disk und Live-Grabber."""
-    print("\n→ Entferne RAM-Disk & Live-Status…")
+    print("\n-> Entferne RAM-Disk & Live-Status…")
     install_user = get_install_user()
 
     # Service stoppen und entfernen
@@ -76,7 +76,7 @@ def uninstall_ramdisk():
     if os.path.exists("/etc/systemd/system/e3dc-grabber.service"):
         os.remove("/etc/systemd/system/e3dc-grabber.service")
         run_command("sudo systemctl daemon-reload")
-        print("  ✓ Service 'e3dc-grabber' entfernt")
+        print("  [OK] Service 'e3dc-grabber' entfernt")
 
     # Screen/Prozesse killen
     run_command(f"sudo -u {install_user} screen -S live-grabber -X quit", timeout=5)
@@ -95,27 +95,27 @@ def uninstall_ramdisk():
                     if "/var/www/html/ramdisk" not in line:
                         f.write(line)
             run_command("sudo systemctl daemon-reload")
-            print("  ✓ fstab bereinigt")
+            print("  [OK] fstab bereinigt")
     except Exception as e:
-        print(f"  ⚠ Fehler bei fstab: {e}")
+        print(f"  [!] Fehler bei fstab: {e}")
 
     # Skript löschen
     grabber_script = os.path.join(get_home_dir(install_user), "get_live.sh")
     if os.path.exists(grabber_script):
         os.remove(grabber_script)
-        print("  ✓ get_live.sh gelöscht")
+        print("  [OK] get_live.sh gelöscht")
 
     # Cronjobs
     remove_cron_pattern("get_live.sh")
     remove_cron_pattern("get_live_json.php")
-    print("  ✓ Cronjobs bereinigt")
+    print("  [OK] Cronjobs bereinigt")
     
     uninstall_logger.info("RAM-Disk deinstalliert.")
     log_task_completed("Deinstallation (RAM-Disk)")
 
 def uninstall_diagramm():
     """Entfernt Diagramm-Skripte und Webportal."""
-    print("\n→ Entferne Diagramm-System & Webportal…")
+    print("\n-> Entferne Diagramm-System & Webportal…")
     
     # Cronjobs
     remove_cron_pattern("plot_soc_changes.py")
@@ -124,30 +124,30 @@ def uninstall_diagramm():
     # Sudoers
     if os.path.exists("/etc/sudoers.d/010_e3dc_web_git"):
         os.remove("/etc/sudoers.d/010_e3dc_web_git")
-        print("  ✓ Sudoers (git) entfernt")
+        print("  [OK] Sudoers (git) entfernt")
     
     if os.path.exists("/etc/sudoers.d/010_e3dc_web_update"):
         os.remove("/etc/sudoers.d/010_e3dc_web_update")
-        print("  ✓ Sudoers (update) entfernt")
+        print("  [OK] Sudoers (update) entfernt")
 
     # Python Skripte im Install-Ordner
     for f in ["plot_soc_changes.py", "plot_live_history.py"]:
         p = os.path.join(INSTALL_PATH, f)
         if os.path.exists(p):
             os.remove(p)
-            print(f"  ✓ {f} gelöscht")
+            print(f"  [OK] {f} gelöscht")
 
     # Webportal
     if input("  Soll das gesamte Webverzeichnis (/var/www/html) geleert werden? (j/n): ").strip().lower() == "j":
         run_command("sudo rm -rf /var/www/html/*", timeout=10)
-        print("  ✓ Webverzeichnis geleert")
+        print("  [OK] Webverzeichnis geleert")
     
     uninstall_logger.info("Diagramm-System deinstalliert.")
     log_task_completed("Deinstallation (Diagramm)")
 
 def uninstall_service():
     """Entfernt E3DC Systemd Service."""
-    print("\n→ Entferne E3DC-Control Service…")
+    print("\n-> Entferne E3DC-Control Service…")
     install_user = get_install_user()
     
     # Stop & Disable
@@ -161,17 +161,17 @@ def uninstall_service():
     if os.path.exists("/etc/systemd/system/e3dc.service"):
         os.remove("/etc/systemd/system/e3dc.service")
         run_command("sudo systemctl daemon-reload")
-        print("  ✓ Service-Datei entfernt")
+        print("  [OK] Service-Datei entfernt")
         
     # Startskript weg
     sh_path = os.path.join(INSTALL_PATH, "E3DC.sh")
     if os.path.exists(sh_path):
         os.remove(sh_path)
-        print("  ✓ E3DC.sh entfernt")
+        print("  [OK] E3DC.sh entfernt")
         
     # Legacy Cronjob entfernen (falls vorhanden)
     if remove_cron_pattern("E3DC.sh"):
-        print("  ✓ Legacy Cronjob entfernt")
+        print("  [OK] Legacy Cronjob entfernt")
 
     uninstall_logger.info("E3DC Service deinstalliert.")
     log_task_completed("Deinstallation (Service)")
@@ -179,19 +179,19 @@ def uninstall_service():
 def uninstall_venv():
     """Entfernt das Python Virtual Environment."""
     venv_name = load_config().get("venv_name", ".venv_e3dc")
-    print(f"\n→ Entferne Python venv ({venv_name})…")
+    print(f"\n-> Entferne Python venv ({venv_name})…")
     venv_path = os.path.join(INSTALL_PATH, venv_name)
     
     if os.path.exists(venv_path):
         try:
             shutil.rmtree(venv_path)
-            print(f"  ✓ {venv_path} gelöscht")
+            print(f"  [OK] {venv_path} gelöscht")
             uninstall_logger.info(f"venv entfernt: {venv_path}")
         except Exception as e:
-            print(f"  ✗ Fehler beim Löschen: {e}")
+            print(f"  [Err] Fehler beim Löschen: {e}")
             log_error("uninstall", f"Fehler beim Löschen von venv: {e}", e)
     else:
-        print("  ℹ️  Kein venv gefunden.")
+        print("  [i]  Kein venv gefunden.")
     
     log_task_completed("Deinstallation (venv)")
 
@@ -214,19 +214,19 @@ def uninstall_full():
     uninstall_venv()
     
     # Config & Binary
-    print("\n→ Programmdateien:")
+    print("\n-> Programmdateien:")
     if input("  Konfiguration (e3dc.config.txt) behalten? (j/n): ").strip().lower() == "n":
         if os.path.exists(INSTALL_PATH):
             shutil.rmtree(INSTALL_PATH, ignore_errors=True)
-            print("  ✓ Installationsordner gelöscht")
+            print("  [OK] Installationsordner gelöscht")
     else:
         # Nur Binary löschen
         bin_path = os.path.join(INSTALL_PATH, "E3DC-Control")
         if os.path.exists(bin_path):
             os.remove(bin_path)
-            print("  ✓ Binary gelöscht")
+            print("  [OK] Binary gelöscht")
             
-    print("\n✓ Deinstallation abgeschlossen.\n")
+    print("\n[OK] Deinstallation abgeschlossen.\n")
     log_task_completed("Vollständige Deinstallation")
 
 def uninstall_menu():

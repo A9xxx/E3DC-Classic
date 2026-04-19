@@ -18,13 +18,13 @@ def change_venv_name():
         new_name = ".venv_e3dc"
     
     if new_name == current_name:
-        print("→ Name ist unverändert.\n")
+        print("-> Name ist unverändert.\n")
         return
 
     # 1. In installer_config.json speichern
     config["venv_name"] = new_name
     save_config(config)
-    print(f"✓ Konfiguration gespeichert: {new_name}")
+    print(f"[OK] Konfiguration gespeichert: {new_name}")
 
     # 2. In e3dc_paths.json aktualisieren (für PHP)
     try:
@@ -35,9 +35,9 @@ def change_venv_name():
             d['venv_name'] = new_name
             with open(paths_file, 'w') as f:
                 json.dump(d, f, indent=2)
-            print("✓ e3dc_paths.json aktualisiert")
+            print("[OK] e3dc_paths.json aktualisiert")
     except Exception as e:
-        print(f"⚠ Fehler beim Aktualisieren von e3dc_paths.json: {e}")
+        print(f"[!] Fehler beim Aktualisieren von e3dc_paths.json: {e}")
 
     # 3. Setup ausführen?
     if input("\nSoll das neue venv jetzt erstellt werden? (j/n) [j]: ").strip().lower() != 'n':

@@ -20,26 +20,26 @@ def safe_execute_task(task_name, task_function, *args, **kwargs):
         True wenn erfolgreich, False bei Fehler
     """
     try:
-        print(f"\n■ Starte: {task_name}…")
+        print(f"\n* Starte: {task_name}…")
         
         # Führe Task aus
         result = task_function(*args, **kwargs)
         
         # Log Erfolg
         log_task_completed(task_name)
-        print(f"✓ {task_name} abgeschlossen.\n")
+        print(f"[OK] {task_name} abgeschlossen.\n")
         
         return True
         
     except KeyboardInterrupt:
         log_task_skipped(task_name, reason="Benutzer hat abgebrochen (Ctrl+C)")
-        print(f"\n✗ {task_name} vom Benutzer abgebrochen.\n")
+        print(f"\n[Err] {task_name} vom Benutzer abgebrochen.\n")
         return False
         
     except Exception as e:
         error_msg = str(e)
         log_error(module_name=task_name, error_msg=error_msg, exception=e)
-        print(f"\n✗ FEHLER in {task_name}:")
+        print(f"\n[Err] FEHLER in {task_name}:")
         print(f"  {error_msg}")
         print(f"  Stack-Trace siehe error.log\n")
         return False

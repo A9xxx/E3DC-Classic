@@ -1,5 +1,14 @@
 # Changelog
  
+## [2.6.10 Classic] - Web UI Fix & Self-Update via Git
+
+### 🔧 Installer & Updates
+*   **Self-Update via Git Pull:** Das Update des Installers und der E3DC-Control Binary wurde vereinheitlicht. `self_update.py` nutzt nun keinen fehleranfälligen ZIP-Download von GitHub mehr, sondern führt reguläre `git pull` Befehle aus.
+*   **HTML Synchronisation:** Nach dem `git pull` und Kompilieren werden die PHP-Webdateien aus dem Repository nun via `DiagramInstaller` automatisch sicher und mit korrekten www-data-Rechten nach `/var/www/html/` kopiert.
+*   **Encoding-Fixes:** Alle Unicode-Sonderzeichen (Sterne, Haken, etc.) wurden aus den Python-Ausgaben im Installer entfernt, um das `latin-1` Terminal ("â†’"-Fehler) auf dem Raspberry Pi nicht zu überfordern. Ausgaben bestehen nun aus sauberem ASCII.
+
+### 🌐 Web-Portal & PHP-Integration
+*   **Fatal-Error Fix:** Die durch den V4-Branch eingeschleppten undefinierten Dashboard-Aufrufe (`handleStatus()`, `handleRunNow()` etc.) in `index.php` und `mobile.php` wurden sicher entfernt, wodurch die Weboberfläche im Classic-Modus wieder problemlos lädt.
 ## [2.6.9 Classic] - Webserver & System-Stabilisierung
  
 ### 🌐 Webserver & PHP-Integration

@@ -9,10 +9,10 @@ def remove_bom(path):
         if content.startswith(b'\xef\xbb\xbf'):
             with open(path, 'wb') as f:
                 f.write(content[3:])
-            print(f"✓ BOM entfernt: {path}")
+            print(f"[OK] BOM entfernt: {path}")
             return True
     except Exception as e:
-        print(f"⚠ Fehler bei {path}: {e}")
+        print(f"[!] Fehler bei {path}: {e}")
     return False
 
 def main():

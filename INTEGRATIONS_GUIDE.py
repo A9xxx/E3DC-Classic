@@ -31,7 +31,7 @@ try:
     from . import ramdisk
     from . import update
 except ImportError as e:
-    print(f"⚠ Warnung beim Laden von Modulen: {e}")
+    print(f"[!] Warnung beim Laden von Modulen: {e}")
 
 
 def display_menu(commands_dict):
@@ -62,7 +62,7 @@ def main():
     try:
         setup_installation_loggers()
     except Exception as e:
-        print(f"✗ Kritischer Fehler beim Setup von Logging: {e}")
+        print(f"[Err] Kritischer Fehler beim Setup von Logging: {e}")
         sys.exit(1)
     
     install_logger = __import__("logging").getLogger("install")
@@ -75,7 +75,7 @@ def main():
         commands = get_registered_commands()  # Aus core.py
     except Exception as e:
         log_error("MainMenu", f"Fehler beim Laden der Commands: {e}", e)
-        print("✗ Kritischer Fehler beim Laden des Menüs")
+        print("[Err] Kritischer Fehler beim Laden des Menüs")
         sys.exit(1)
     
     # Hauptschleife
@@ -90,7 +90,7 @@ def main():
                 break
             
             if choice not in commands:
-                print(f"✗ Ungültige Auswahl: {choice}")
+                print(f"[Err] Ungültige Auswahl: {choice}")
                 continue
             
             cmd_data = commands[choice]
@@ -101,19 +101,19 @@ def main():
             success = safe_menu_action(choice, menu_name, menu_func)
             
             if not success:
-                print("⚠ Task beendet mit Fehlern (siehe error.log)")
+                print("[!] Task beendet mit Fehlern (siehe error.log)")
             
             # Optionaler Pause nach Menüpunkt
             input("\nDrücke ENTER zum Fortfahren…")
         
         except KeyboardInterrupt:
-            print("\n\n✗ Installation vom Benutzer unterbrochen (Ctrl+C)")
+            print("\n\n[Err] Installation vom Benutzer unterbrochen (Ctrl+C)")
             install_logger.warning("Installation vom Benutzer unterbrochen")
             break
         
         except Exception as e:
             log_error("MainMenu", f"Unerwarteter Fehler: {e}", e)
-            print(f"\n✗ KRITISCHER FEHLER: {e}")
+            print(f"\n[Err] KRITISCHER FEHLER: {e}")
             print("  Bitte error.log prüfen")
     
     # Zeige finale Zusammenfassung

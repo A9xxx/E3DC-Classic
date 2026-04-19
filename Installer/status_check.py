@@ -63,9 +63,9 @@ def show_system_status():
     # 0. Internet Check
     print("--- Netzwerk ---")
     if check_internet_connection():
-        print("✓ Internetverbindung: OK (Ping 8.8.8.8)")
+        print("[OK] Internetverbindung: OK (Ping 8.8.8.8)")
     else:
-        print("✗ Internetverbindung: FEHLGESCHLAGEN")
+        print("[Err] Internetverbindung: FEHLGESCHLAGEN")
         issues_found.append("internet")
 
     # 1. E3DC-Control Service
@@ -76,20 +76,20 @@ def show_system_status():
         print("⚪ Service 'e3dc': Nicht installiert (Systemd)")
         # Fallback Check Screen
         if check_screen_session("E3DC"):
-            print("✓ Screen-Session 'E3DC': Gefunden (Legacy Mode)")
+            print("[OK] Screen-Session 'E3DC': Gefunden (Legacy Mode)")
         else:
-            print("✗ Screen-Session 'E3DC': Nicht gefunden")
+            print("[Err] Screen-Session 'E3DC': Nicht gefunden")
             print("  -> E3DC-Control läuft nicht.")
             issues_found.append("e3dc_not_running")
     else:
-        status_icon = "✓" if e3dc_srv["active"] else "✗"
-        enabled_icon = "✓" if e3dc_srv["enabled"] else "✗"
+        status_icon = "[OK]" if e3dc_srv["active"] else "[Err]"
+        enabled_icon = "[OK]" if e3dc_srv["enabled"] else "[Err]"
         
         print(f"{status_icon} Service Status: {'Aktiv (running)' if e3dc_srv['active'] else 'Inaktiv (stopped/failed)'}")
         print(f"{enabled_icon} Autostart:     {'Aktiviert (enabled)' if e3dc_srv['enabled'] else 'Deaktiviert (disabled)'}")
         
         if not e3dc_srv["active"]:
-            print("\n  ⚠ Diagnose-Logs (letzte 10 Zeilen):")
+            print("\n  [!] Diagnose-Logs (letzte 10 Zeilen):")
             print("  " + "-" * 40)
             for line in e3dc_srv["log"].split("\n"):
                 if line.strip():
@@ -105,14 +105,14 @@ def show_system_status():
     if guard_srv["status"] == "not_installed":
         print("⚪ Service 'piguard': Nicht installiert")
     else:
-        status_icon = "✓" if guard_srv["active"] else "✗"
-        enabled_icon = "✓" if guard_srv["enabled"] else "✗"
+        status_icon = "[OK]" if guard_srv["active"] else "[Err]"
+        enabled_icon = "[OK]" if guard_srv["enabled"] else "[Err]"
         
         print(f"{status_icon} Service Status: {'Aktiv (running)' if guard_srv['active'] else 'Inaktiv (stopped/failed)'}")
         print(f"{enabled_icon} Autostart:     {'Aktiviert (enabled)' if guard_srv['enabled'] else 'Deaktiviert (disabled)'}")
         
         if not guard_srv["active"]:
-             print("\n  ⚠ Diagnose-Logs (letzte 10 Zeilen):")
+             print("\n  [!] Diagnose-Logs (letzte 10 Zeilen):")
              print("  " + "-" * 40)
              for line in guard_srv["log"].split("\n"):
                 if line.strip():
@@ -127,11 +127,11 @@ def show_system_status():
     if grabber_srv["status"] == "not_installed":
         # Fallback: Prüfe auf alte Screen-Session
         if check_screen_session("live-grabber"):
-            print("✓ Screen-Session 'live-grabber': Gefunden (Legacy Mode)")
+            print("[OK] Screen-Session 'live-grabber': Gefunden (Legacy Mode)")
         else:
             print("⚪ Service 'e3dc-grabber': Nicht installiert")
     else:
-        status_icon = "✓" if grabber_srv["active"] else "✗"
+        status_icon = "[OK]" if grabber_srv["active"] else "[Err]"
         print(f"{status_icon} Service Status: {'Aktiv (running)' if grabber_srv['active'] else 'Inaktiv'}")
 
     # 3. System-Ressourcen
@@ -159,7 +159,7 @@ def show_system_status():
             usage_percent = parts[4]
             print(f"Speicherplatz (/): {usage_percent} belegt ({parts[3]} frei)")
             if int(usage_percent.strip('%')) > 90:
-                print("  ⚠ WARNUNG: Speicherplatz fast voll!")
+                print("  [!] WARNUNG: Speicherplatz fast voll!")
                 issues_found.append("disk_full")
     
     # Uptime
@@ -195,7 +195,7 @@ def show_system_status():
 
     # 5. Lösungsvorschläge
     if issues_found:
-        print("\n=== 💡 Lösungsvorschläge ===")
+        print("\n=== [Tipp] Lösungsvorschläge ===")
         if "internet" in issues_found:
             print("• Internet: Prüfe Netzwerkkabel/WLAN und Router. Prüfe DNS-Einstellungen.")
         
@@ -222,7 +222,7 @@ def show_system_status():
         if "venv_missing" in issues_found:
             print("• Venv fehlt: Nutze Menüpunkt '22' (Python venv einrichten) zur Reparatur.")
     else:
-        print("\n✓ Keine offensichtlichen Probleme gefunden.")
+        print("\n[OK] Keine offensichtlichen Probleme gefunden.")
 
     print("\n==============================\n")
     log_task_completed("System-Statusprüfung")

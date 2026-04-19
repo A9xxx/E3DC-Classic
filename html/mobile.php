@@ -10,11 +10,11 @@ handleServiceRestart();
 handleWatchdogStatus();
 handleWatchdogLog();
 handleSaveSetting();
-handleStatus();
-handleRunNow();
-handleRunLiveHistory();
+// handleStatus();
+// handleRunNow();
+// handleRunLiveHistory();
 handleRunUpdate();
-handleArchivDiagram();
+// handleArchivDiagram();
 
 $stampFile = '/var/www/html/tmp/plot_soc_done_mobile';
 $lastUpdateTs = file_exists($stampFile) ? filemtime($stampFile) : 0;

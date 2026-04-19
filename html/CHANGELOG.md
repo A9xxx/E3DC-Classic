@@ -1,5 +1,14 @@
 # Changelog
  
+## [2.6.10 Classic] - Web UI Fix & Self-Update via Git
+
+### 🔧 Installer & Updates
+*   **Self-Update via Git Pull:** Das Update des Installers und der E3DC-Control Binary wurde vereinheitlicht. `self_update.py` nutzt nun keinen fehleranfälligen ZIP-Download von GitHub mehr, sondern führt reguläre `git pull` Befehle aus.
+*   **HTML Synchronisation:** Nach dem `git pull` und Kompilieren werden die PHP-Webdateien aus dem Repository nun via `DiagramInstaller` automatisch sicher und mit korrekten www-data-Rechten nach `/var/www/html/` kopiert.
+*   **Encoding-Fixes:** Alle Unicode-Sonderzeichen (Sterne, Haken, etc.) wurden aus den Python-Ausgaben im Installer entfernt, um das `latin-1` Terminal ("â†’"-Fehler) auf dem Raspberry Pi nicht zu überfordern. Ausgaben bestehen nun aus sauberem ASCII.
+
+### 🌐 Web-Portal & PHP-Integration
+*   **Fatal-Error Fix:** Die durch den V4-Branch eingeschleppten undefinierten Dashboard-Aufrufe (`handleStatus()`, `handleRunNow()` etc.) in `index.php` und `mobile.php` wurden sicher entfernt, wodurch die Weboberfläche im Classic-Modus wieder problemlos lädt.
 ## [2.6.9 Classic] - Webserver & System-Stabilisierung
  
 ### 🌐 Webserver & PHP-Integration
@@ -28,13 +37,13 @@
 *   **Config-Fix:** Fehler beim Kopieren der Konfigurationsdatei behoben, wenn Quelle und Ziel identisch sind (SameFileError).
 *   **Update-Silence:** 404-Netzwerkfehler bei der Update-Prüfung werden nun unterdrückt, solange noch keine Releases im neuen Repository vorhanden sind.
 *   **Code-Robustheit:** Import von `HTTPError` für stabileres Error-Handling hinzugefügt.
- 
+
 ## [2.6.6 Classic] - Repository Separation & Clean Update
- 
+
 ### 🚀 Self-Update & Branching
 *   **Repository-Wechsel:** Der Installer ist nun fest mit dem neuen Classic-Repository `A9xxx/E3DC-Classic` verknüpft. Dies verhindert ungewollte "Updates" auf die inkompatible V4-Version aus dem Hauptzweig.
 *   **Intelligentes Update:** Die Extraktions-Logik im Self-Update wurde flexibler gestaltet. Der Installer findet nun automatisch das korrekte Verzeichnis in der Update-ZIP, basierend auf der Dateistruktur des Classic-Repositories.
- 
+
 ### 🧹 System & Stabilität (Classic-Zweig)
 *   **Kein Python mehr für Diagramme:** Im Classic-Modus laufen keine großen Python-Hintergrundscripte (`plot_soc_changes.py`, `plot_live_history.py`) mehr auf dem Server.
 *   **Webbasierte Diagramme:** Sämtliche Leistungsverläufe (Live, Historie) und der Speicher-SoC/aWATTar Prognose-Chart werden nun rasend schnell komplett im Browser (Client-Side Plotly.js) via `diagramm.php` und `live_diagramm.php` gezeichnet.

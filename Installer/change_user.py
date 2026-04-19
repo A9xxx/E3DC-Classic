@@ -9,12 +9,12 @@ def change_install_user():
     print(f"Aktueller Installationsbenutzer: {current_user}")
     new_user = input("Neuen Installationsbenutzer eingeben: ").strip()
     if not new_user:
-        print("✗ Kein Benutzer eingegeben. Abbruch.\n")
+        print("[Err] Kein Benutzer eingegeben. Abbruch.\n")
         return
     if new_user == current_user:
-        print("→ Benutzer ist bereits gesetzt. Keine Änderung.\n")
+        print("-> Benutzer ist bereits gesetzt. Keine Änderung.\n")
         return
     save_config({"install_user": new_user})
-    print(f"✓ Installationsbenutzer geändert auf: {new_user}\n")
+    print(f"[OK] Installationsbenutzer geändert auf: {new_user}\n")
 
 register_command("19", "Installationsbenutzer ändern", change_install_user, sort_order=190)

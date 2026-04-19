@@ -42,18 +42,18 @@ def start_e3dc_control():
 
     # Prüfe ob Service existiert
     if os.path.exists("/etc/systemd/system/e3dc.service"):
-        print("→ Starte via Systemd...")
+        print("-> Starte via Systemd...")
         res = run_command("sudo systemctl start e3dc")
         if res['success']:
-            print("✓ Service gestartet.")
+            print("[OK] Service gestartet.")
             time.sleep(1)
             if is_e3dc_running():
-                print("✓ E3DC läuft.")
+                print("[OK] E3DC läuft.")
                 log_task_completed("E3DC-Control gestartet (Systemd)")
             else:
-                print("⚠ Service gestartet, aber Prozess scheint nicht zu laufen.")
+                print("[!] Service gestartet, aber Prozess scheint nicht zu laufen.")
         else:
-            print(f"✗ Fehler beim Starten des Services: {res['stderr']}")
+            print(f"[Err] Fehler beim Starten des Services: {res['stderr']}")
             log_error("service_setup", f"Service Start fehlgeschlagen: {res['stderr']}")
         return
     
@@ -62,7 +62,7 @@ def start_e3dc_control():
     install_user = get_install_user()
 
     if not os.path.exists(sh_path) or not os.path.exists("/etc/systemd/system/e3dc.service"):
-        print("⚠ E3DC-Service ist noch nicht eingerichtet.")
+        print("[!] E3DC-Service ist noch nicht eingerichtet.")
         choice = input("Soll der E3DC-Service jetzt installiert werden (empfohlen)? (j/n): ").strip().lower()
         if choice == "j":
             install_e3dc_service()
@@ -71,30 +71,30 @@ def start_e3dc_control():
 
     # Legacy Startversuch (falls User Service ablehnt aber Skript da ist)
     if not os.path.exists(sh_path):
-        print(f"✗ Startskript nicht gefunden: {sh_path}")
+        print(f"[Err] Startskript nicht gefunden: {sh_path}")
         return
 
     if not os.access(sh_path, os.X_OK):
-        print(f"⚠ Startskript ist nicht ausführbar: {sh_path}")
+        print(f"[!] Startskript ist nicht ausführbar: {sh_path}")
         try:
             os.chmod(sh_path, 0o755)
-            print("✓ Startskript ist jetzt ausführbar.\n")
+            print("[OK] Startskript ist jetzt ausführbar.\n")
         except Exception:
             pass
 
     running = is_e3dc_running()
     if running:
-        print("⚠ E3DC-Control läuft bereits.")
+        print("[!] E3DC-Control läuft bereits.")
         return
 
-    print("→ Starte E3DC-Control (Screen manuell)…")
+    print("-> Starte E3DC-Control (Screen manuell)…")
     result = run_command(f"sudo -u {install_user} screen -dmS E3DC {shlex.quote(sh_path)}", timeout=5)
     
     if result['success']:
-        print("✓ E3DC-Control gestartet (Legacy Mode).\n")
+        print("[OK] E3DC-Control gestartet (Legacy Mode).\n")
         log_task_completed("E3DC-Control gestartet (Legacy)")
     else:
-        print(f"✗ Start fehlgeschlagen: {result['stderr']}\n")
+        print(f"[Err] Start fehlgeschlagen: {result['stderr']}\n")
         log_error("service_setup", f"Start fehlgeschlagen: {result['stderr']}")
 
 
@@ -108,7 +108,7 @@ def install_e3dc_service():
     service_path = "/etc/systemd/system/e3dc.service"
 
     # 1. Startskript E3DC.sh erstellen
-    print("→ Erstelle Startskript (E3DC.sh)…")
+    print("-> Erstelle Startskript (E3DC.sh)…")
     try:
         with open(sh_path, "w") as f:
             f.write("#!/bin/bash\n")
@@ -121,14 +121,14 @@ def install_e3dc_service():
         os.chmod(sh_path, 0o755)
         uid, gid = get_user_ids()
         os.chown(sh_path, uid, gid)
-        print("✓ Startskript erstellt/aktualisiert.\n")
+        print("[OK] Startskript erstellt/aktualisiert.\n")
     except Exception as e:
-        print(f"✗ Fehler beim Erstellen des Startskripts: {e}")
+        print(f"[Err] Fehler beim Erstellen des Startskripts: {e}")
         log_error("service_setup", f"Fehler E3DC.sh: {e}", e)
         return False
 
     # 2. Systemd Service erstellen
-    print("→ Erstelle Systemd Service…")
+    print("-> Erstelle Systemd Service…")
     service_content = f"""[Unit]
 Description=E3DC-Control Service
 Wants=network-online.target
@@ -158,31 +158,31 @@ WantedBy=multi-user.target
         run_command(f"sudo chmod 644 {service_path}")
         run_command("sudo systemctl daemon-reload")
         run_command("sudo systemctl enable e3dc")
-        print("✓ Service 'e3dc' erstellt und aktiviert.\n")
+        print("[OK] Service 'e3dc' erstellt und aktiviert.\n")
     except Exception as e:
-        print(f"✗ Fehler beim Erstellen des Services: {e}")
+        print(f"[Err] Fehler beim Erstellen des Services: {e}")
         log_error("service_setup", f"Fehler Service: {e}", e)
         return False
 
     # 3. Alte Cronjobs entfernen
-    print("→ Prüfe auf alte Crontab-Einträge…")
+    print("-> Prüfe auf alte Crontab-Einträge…")
     _remove_legacy_cronjobs(install_user)
 
     # 3b. rc.local bereinigen (Legacy Autostart)
-    print("→ Prüfe auf alte rc.local-Einträge…")
+    print("-> Prüfe auf alte rc.local-Einträge…")
     _remove_rc_local_entry()
 
     # 4. Service starten
-    print("→ Starte Service…")
+    print("-> Starte Service…")
     # Alte Screen-Session beenden falls vorhanden
     run_command(f"sudo -u {install_user} screen -S E3DC -X quit")
     
     res = run_command("sudo systemctl restart e3dc")
     if res['success']:
-        print("✓ Service gestartet.")
+        print("[OK] Service gestartet.")
         log_task_completed("E3DC Service eingerichtet")
     else:
-        print(f"✗ Fehler beim Starten: {res['stderr']}")
+        print(f"[Err] Fehler beim Starten: {res['stderr']}")
         log_error("service_setup", f"Service Start Error: {res['stderr']}")
 
     return True
@@ -209,7 +209,7 @@ def _remove_legacy_cronjobs(user):
                 tmp_path = tmp.name
             run_command(f"sudo crontab -u {user} {tmp_path}")
             os.unlink(tmp_path)
-            print("✓ Alte Einträge aus Benutzer-Crontab entfernt.")
+            print("[OK] Alte Einträge aus Benutzer-Crontab entfernt.")
     
     # Root Crontab
     res = run_command("sudo crontab -l")
@@ -230,7 +230,7 @@ def _remove_legacy_cronjobs(user):
                 tmp_path = tmp.name
             run_command(f"sudo crontab {tmp_path}")
             os.unlink(tmp_path)
-            print("✓ Alte Einträge aus Root-Crontab entfernt.")
+            print("[OK] Alte Einträge aus Root-Crontab entfernt.")
 
 
 def _remove_rc_local_entry():
@@ -249,7 +249,7 @@ def _remove_rc_local_entry():
             # Suche nach E3DC Startbefehl (screen ... E3DC.sh)
             # Typisch: su pi -c "screen -dmS E3DC /home/pi/E3DC-Control/E3DC.sh"
             if "E3DC.sh" in line and "screen" in line and not line.strip().startswith("#"):
-                print(f"  → Entferne veralteten Eintrag aus rc.local: {line.strip()}")
+                print(f"  -> Entferne veralteten Eintrag aus rc.local: {line.strip()}")
                 modified = True
                 continue
             new_lines.append(line)
@@ -257,10 +257,10 @@ def _remove_rc_local_entry():
         if modified:
             with open(rc_local, "w") as f:
                 f.writelines(new_lines)
-            print("✓ /etc/rc.local bereinigt.")
+            print("[OK] /etc/rc.local bereinigt.")
             service_logger.info("Legacy E3DC entry removed from /etc/rc.local.")
     except Exception as e:
-        print(f"⚠ Fehler beim Bereinigen von {rc_local}: {e}")
+        print(f"[!] Fehler beim Bereinigen von {rc_local}: {e}")
         service_logger.error(f"Error cleaning rc.local: {e}")
 
 # Alias für Rückwärtskompatibilität (für install_all.py)

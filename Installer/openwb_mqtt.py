@@ -20,7 +20,7 @@ openwb_logger = get_or_create_logger("openwb")
 
 def install_mqtt():
     """Installiert MQTT-Pakete."""
-    print("→ Installiere MQTT-Pakete…")
+    print("-> Installiere MQTT-Pakete…")
     print("  Dies kann einige Minuten dauern…\n")
     openwb_logger.info("Starte Installation der MQTT-Pakete.")
     
@@ -28,14 +28,14 @@ def install_mqtt():
         try:
             result = run_command(f"apt-get install -y {package}", timeout=300)
             if result['success']:
-                print(f"  ✓ {package} installiert")
+                print(f"  [OK] {package} installiert")
                 openwb_logger.info(f"Paket '{package}' erfolgreich installiert.")
             else:
-                print(f"  ✗ Fehler bei {package}: {result['stderr']}")
+                print(f"  [Err] Fehler bei {package}: {result['stderr']}")
                 log_error("openwb_mqtt", f"Fehler bei der Installation von {package}: {result['stderr']}")
                 return False
         except Exception as e:
-            print(f"  ✗ Fehler: {e}")
+            print(f"  [Err] Fehler: {e}")
             log_error("openwb_mqtt", f"Exception bei der Installation von {package}: {e}", e)
             return False
     
@@ -71,7 +71,7 @@ def get_mqtt_config():
         ip = input("IP-Adresse der openWB Wallbox (z.B. 192.168.178.100): ").strip()
         if validate_ip(ip):
             break
-        print("✗ Ungültige IP-Adresse! Bitte versuche es erneut.")
+        print("[Err] Ungültige IP-Adresse! Bitte versuche es erneut.")
         log_warning("openwb_mqtt", f"Ungültige IP-Adresse eingegeben: {ip}")
     
     print()
@@ -83,7 +83,7 @@ def get_mqtt_config():
             topic = "openWB/internal_chargepoint/0/get/power"
         if topic:
             break
-        print("✗ Topic darf nicht leer sein!")
+        print("[Err] Topic darf nicht leer sein!")
         log_warning("openwb_mqtt", "Leeres MQTT-Topic eingegeben.")
     
     print()
@@ -96,7 +96,7 @@ def get_mqtt_config():
     try:
         int(port)
     except ValueError:
-        print("✗ Port muss eine Zahl sein! Nutze Standard: 1883")
+        print("[Err] Port muss eine Zahl sein! Nutze Standard: 1883")
         log_warning("openwb_mqtt", f"Ungültiger Port eingegeben: {port}. Fallback auf 1883.")
         port = "1883"
     
@@ -111,11 +111,11 @@ def get_mqtt_config():
 
 def update_config(config_data):
     """Aktualisiert die e3dc.config.txt mit MQTT-Einstellungen."""
-    print("\n→ Aktualisiere Konfiguration…")
+    print("\n-> Aktualisiere Konfiguration…")
     openwb_logger.info("Aktualisiere e3dc.config.txt mit MQTT-Daten.")
     
     if not os.path.exists(CONFIG_FILE):
-        print(f"✗ Fehler: Konfigurationsdatei {CONFIG_FILE} nicht gefunden!")
+        print(f"[Err] Fehler: Konfigurationsdatei {CONFIG_FILE} nicht gefunden!")
         print("  Stellen Sie sicher, dass E3DC-Control bereits installiert ist.")
         log_error("openwb_mqtt", f"Konfigurationsdatei nicht gefunden: {CONFIG_FILE}")
         return False
@@ -149,7 +149,7 @@ def update_config(config_data):
         with open(CONFIG_FILE, 'w') as f:
             f.write(content)
         
-        print("✓ Konfiguration aktualisiert:")
+        print("[OK] Konfiguration aktualisiert:")
         print(f"  WB_ip = {config_data['ip']}")
         print(f"  WB_topic = {config_data['topic']}")
         print(f"  WB_port = {config_data['port']}")
@@ -158,14 +158,14 @@ def update_config(config_data):
         return True
     
     except Exception as e:
-        print(f"✗ Fehler beim Aktualisieren der Konfiguration: {e}")
+        print(f"[Err] Fehler beim Aktualisieren der Konfiguration: {e}")
         log_error("openwb_mqtt", f"Fehler beim Aktualisieren der Konfiguration: {e}", e)
         return False
 
 
 def test_mqtt_connection(ip, port):
     """Testet die Verbindung zum MQTT Broker."""
-    print("\n→ Teste MQTT-Verbindung…")
+    print("\n-> Teste MQTT-Verbindung…")
     openwb_logger.info(f"Teste MQTT-Verbindung zu {ip}:{port}.")
     
     try:
@@ -176,16 +176,16 @@ def test_mqtt_connection(ip, port):
         sock.close()
         
         if result == 0:
-            print(f"✓ Verbindung zum MQTT Broker ({ip}:{port}) erfolgreich!")
+            print(f"[OK] Verbindung zum MQTT Broker ({ip}:{port}) erfolgreich!")
             openwb_logger.info(f"MQTT-Verbindung zu {ip}:{port} erfolgreich.")
             return True
         else:
-            print(f"✗ Keine Verbindung zum MQTT Broker ({ip}:{port})!")
+            print(f"[Err] Keine Verbindung zum MQTT Broker ({ip}:{port})!")
             print("  Bitte prüfe IP-Adresse und Port.")
             log_warning("openwb_mqtt", f"Keine Verbindung zum MQTT Broker ({ip}:{port}).")
             return False
     except Exception as e:
-        print(f"⚠ Fehler beim Testen: {e}")
+        print(f"[!] Fehler beim Testen: {e}")
         log_warning("openwb_mqtt", f"Fehler beim Testen der MQTT-Verbindung: {e}")
         return False
 
@@ -202,11 +202,11 @@ def setup_openwb_mqtt():
     
     # MQTT installieren
     if not install_mqtt():
-        print("\n✗ MQTT-Installation fehlgeschlagen!")
+        print("\n[Err] MQTT-Installation fehlgeschlagen!")
         log_error("openwb_mqtt", "MQTT-Installation fehlgeschlagen.")
         return
     
-    print("\n✓ MQTT installiert\n")
+    print("\n[OK] MQTT installiert\n")
     log_task_completed("MQTT-Pakete installieren")
     
     # Konfiguration abfragen
@@ -218,14 +218,14 @@ def setup_openwb_mqtt():
     if not test_success:
         choice = input("\nFortfahren trotzdem? (j/n): ").strip().lower()
         if choice != "j":
-            print("→ Setup abgebrochen.")
+            print("-> Setup abgebrochen.")
             openwb_logger.warning("Setup nach fehlgeschlagenem Verbindungstest abgebrochen.")
             return
     
     # Konfiguration speichern
     if update_config(config):
         print("\n" + "="*50)
-        print("✓ openWB MQTT Integration erfolgreich eingerichtet!")
+        print("[OK] openWB MQTT Integration erfolgreich eingerichtet!")
         print("="*50 + "\n")
         print("Nächste Schritte:")
         print("1. Starten Sie E3DC-Control neu")
@@ -233,7 +233,7 @@ def setup_openwb_mqtt():
         print("3. Überprüfen Sie die Logs für mögliche Fehler\n")
         log_task_completed("openWB MQTT Integration")
     else:
-        print("\n✗ Fehler beim Speichern der Konfiguration!")
+        print("\n[Err] Fehler beim Speichern der Konfiguration!")
         log_error("openwb_mqtt", "Fehler beim Speichern der MQTT-Konfiguration in e3dc.config.txt.")
 
 

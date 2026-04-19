@@ -25,7 +25,7 @@ def get_latest_version():
     """Holt die neueste Commit-ID vom Remote."""
     git_dir = os.path.join(INSTALL_PATH, ".git")
     if not os.path.exists(git_dir):
-        print("✗ Keine Git-Installation gefunden.")
+        print("[Err] Keine Git-Installation gefunden.")
         log_warning("update", "Keine Git-Installation für Update-Prüfung gefunden.")
         return None
 
@@ -33,7 +33,7 @@ def get_latest_version():
     # Prüfe ob Remote existiert
     result = run_command(f"sudo -u {install_user} git -C {INSTALL_PATH} remote get-url origin", timeout=5)
     if not result['success']:
-        print("✗ Kein Git-Remote 'origin' gefunden.")
+        print("[Err] Kein Git-Remote 'origin' gefunden.")
         log_warning("update", "Kein Git-Remote 'origin' für Update-Prüfung gefunden.")
         return None
 
@@ -43,7 +43,7 @@ def get_latest_version():
         timeout=10
     )
     if not result['success'] or not result['stdout'].strip():
-        print("✗ Branch 'master' nicht gefunden.")
+        print("[Err] Branch 'master' nicht gefunden.")
         log_warning("update", "Branch 'master' auf Remote 'origin' nicht gefunden.")
         return None
 
@@ -107,22 +107,22 @@ def update_e3dc(headless=False):
     update_logger.info("Starte Update-Prozess.")
 
     if not os.path.exists(INSTALL_PATH):
-        print("✗ Installation nicht gefunden.")
+        print("[Err] Installation nicht gefunden.")
         log_error("update", "Installationsverzeichnis nicht gefunden, Update abgebrochen.")
         return
 
     old_version = get_current_version()
     if old_version is None:
-        print("✗ Aktuelle Version konnte nicht ermittelt werden.")
+        print("[Err] Aktuelle Version konnte nicht ermittelt werden.")
         log_error("update", "Aktuelle Version konnte nicht ermittelt werden, Update abgebrochen.")
-        send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Aktuelle Version nicht ermittelbar.")
+        send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Aktuelle Version nicht ermittelbar.")
         return
 
     latest_version = get_latest_version()
     if latest_version is None:
-        print("✗ Update nicht möglich – prüfe Internet und Repository.")
+        print("[Err] Update nicht möglich – prüfe Internet und Repository.")
         log_error("update", "Neueste Version konnte nicht ermittelt werden, Update abgebrochen.")
-        send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Neueste Version nicht ermittelbar.")
+        send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Neueste Version nicht ermittelbar.")
         return
 
     print(f"Aktuelle Version: {old_version[:7]}")
@@ -146,7 +146,7 @@ def update_e3dc(headless=False):
                 discard_changes_web = flags.get('discard', False)
             os.remove(flag_file) # Datei löschen
             if force_update_web or discard_changes_web:
-                print(f"→ Web-Optionen: Force={force_update_web}, Discard={discard_changes_web}")
+                print(f"-> Web-Optionen: Force={force_update_web}, Discard={discard_changes_web}")
         except Exception:
             pass
 
@@ -154,23 +154,23 @@ def update_e3dc(headless=False):
     missing = count_missing_commits()
     ask_confirmation = True
     if missing is None:
-        print("⚠ Commit-Zählung nicht möglich.")
+        print("[!] Commit-Zählung nicht möglich.")
     elif missing == 0:
-        print("✓ Du bist auf dem neuesten Stand.")
+        print("[OK] Du bist auf dem neuesten Stand.")
         update_logger.info("Kein Update verfügbar, Version ist aktuell.")
         sys.stdout.flush()
         if force_update_web:
-            print("→ Update wird erzwungen (Web-Option).")
+            print("-> Update wird erzwungen (Web-Option).")
             ask_confirmation = False
         elif not headless:
-            confirm = input("\n→ Möchtest du trotzdem aktualisieren (neu installieren)? (j/n): ").strip().lower()
+            confirm = input("\n-> Möchtest du trotzdem aktualisieren (neu installieren)? (j/n): ").strip().lower()
             if confirm != "j":
                 return
             ask_confirmation = False
         else:
             return
     else:
-        print(f"→ Es fehlen {missing} Commit(s).\n")
+        print(f"-> Es fehlen {missing} Commit(s).\n")
         commits = list_missing_commits()
         if commits:
             print("Fehlende Commits:")
@@ -178,9 +178,9 @@ def update_e3dc(headless=False):
 
     # Bestätigung
     if not headless and ask_confirmation:
-        confirm = input("\n→ Möchtest du jetzt aktualisieren? (j/n): ").strip().lower()
+        confirm = input("\n-> Möchtest du jetzt aktualisieren? (j/n): ").strip().lower()
         if confirm != "j":
-            print("✗ Update abgebrochen. Es wurden keine Änderungen vorgenommen.\n")
+            print("[Err] Update abgebrochen. Es wurden keine Änderungen vorgenommen.\n")
             
             # Reset origin/master auf alten Stand, damit "git status" sauber bleibt
             if old_origin_sha:
@@ -188,20 +188,20 @@ def update_e3dc(headless=False):
             log_warning("update", "Update vom Benutzer abgebrochen.")
             return
     elif headless:
-        print("→ Starte Update (Headless-Modus)...\n")
+        print("-> Starte Update (Headless-Modus)...\n")
         sys.stdout.flush()
 
     # Backup erstellen
-    print("\n→ Erstelle Backup…")
+    print("\n-> Erstelle Backup…")
     backup_dir = backup_current_version()
     if backup_dir is None:
-        print("✗ Backup fehlgeschlagen. Update abgebrochen.\n")
+        print("[Err] Backup fehlgeschlagen. Update abgebrochen.\n")
         log_error("update", "Backup vor Update fehlgeschlagen, Update abgebrochen.")
-        send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Backup fehlgeschlagen.")
+        send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Backup fehlgeschlagen.")
         return
 
     # Prüfe auf lokale Änderungen
-    print("→ Prüfe auf lokale Änderungen…")
+    print("-> Prüfe auf lokale Änderungen…")
     install_user = get_install_user()
     result1 = subprocess.run(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && git diff --quiet'", shell=True)
     result2 = subprocess.run(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && git diff --cached --quiet'", shell=True)
@@ -211,46 +211,46 @@ def update_e3dc(headless=False):
         discard_changes = discard_changes_web
         
         if not discard_changes and not headless:
-            print("⚠ Es wurden lokale Änderungen an Dateien gefunden.")
-            decision = input("→ Möchtest du diese verwerfen (v) oder behalten (b)? [b]: ").strip().lower()
+            print("[!] Es wurden lokale Änderungen an Dateien gefunden.")
+            decision = input("-> Möchtest du diese verwerfen (v) oder behalten (b)? [b]: ").strip().lower()
             if decision == 'v':
                 discard_changes = True
 
         if discard_changes:
-            print("→ Verwerfe lokale Änderungen (git reset --hard)…")
+            print("-> Verwerfe lokale Änderungen (git reset --hard)…")
             result = run_command(f"sudo -u {install_user} git -C {INSTALL_PATH} reset --hard HEAD")
             if not result['success']:
-                print("✗ Zurücksetzen fehlgeschlagen. Update abgebrochen.\n")
+                print("[Err] Zurücksetzen fehlgeschlagen. Update abgebrochen.\n")
                 log_error("update", f"git reset --hard fehlgeschlagen: {result['stderr']}")
-                send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Git Reset fehlgeschlagen.")
+                send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Git Reset fehlgeschlagen.")
                 return
-            print("✓ Änderungen verworfen.")
+            print("[OK] Änderungen verworfen.")
         else:
-            print("⚠ Sichere Änderungen automatisch per git stash…")
+            print("[!] Sichere Änderungen automatisch per git stash…")
             result = run_command(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && git stash push -m \"Auto-Stash vor Update\"'")
             if not result['success']:
-                print("✗ Stash fehlgeschlagen. Update abgebrochen.\n")
+                print("[Err] Stash fehlgeschlagen. Update abgebrochen.\n")
                 log_error("update", f"git stash fehlgeschlagen, Update abgebrochen: {result['stderr']}")
-                send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Git Stash fehlgeschlagen.")
+                send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Git Stash fehlgeschlagen.")
                 return
-            print("✓ Änderungen gestasht.")
+            print("[OK] Änderungen gestasht.")
     else:
-        print("✓ Keine lokalen Änderungen.")
+        print("[OK] Keine lokalen Änderungen.")
 
     # Rechte im .git-Ordner vor Pull korrigieren
-    print("→ Korrigiere .git-Berechtigungen vor Update…")
+    print("-> Korrigiere .git-Berechtigungen vor Update…")
     run_command(f"sudo chown -R {install_user}:{install_user} {INSTALL_PATH}/.git")
 
     # Update durchführen
-    print("→ Hole neue Version…")
+    print("-> Hole neue Version…")
     result = run_command(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && git pull'", timeout=60)
     if not result['success']:
-        print("✗ Git Pull fehlgeschlagen. Update abgebrochen.\n")
+        print("[Err] Git Pull fehlgeschlagen. Update abgebrochen.\n")
         log_error("update", f"git pull fehlgeschlagen, Update abgebrochen: {result['stderr']}")
-        send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Git Pull fehlgeschlagen.")
+        send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Git Pull fehlgeschlagen.")
         return
 
-    print("→ Kompiliere neue Version…")
+    print("-> Kompiliere neue Version…")
     venv_name = load_config().get("venv_name", ".venv_e3dc")
     venv_act = os.path.join(INSTALL_PATH, venv_name, "bin", "activate") if venv_name else ""
     make_cmd = "make"
@@ -260,30 +260,39 @@ def update_e3dc(headless=False):
         
     result = run_command(f"sudo -u {install_user} bash -c 'cd {INSTALL_PATH} && {make_cmd}'", timeout=300)
     if not result['success']:
-        print("✗ Kompilierung fehlgeschlagen. Update abgebrochen.\n")
+        print("[Err] Kompilierung fehlgeschlagen. Update abgebrochen.\n")
         log_error("update", f"Kompilierung fehlgeschlagen, Update abgebrochen: {result['stderr']}")
-        send_telegram_notification("❌ E3DC-Control Update fehlgeschlagen!\nUrsache: Kompilierung fehlgeschlagen.")
+        send_telegram_notification("[Err] E3DC-Control Update fehlgeschlagen!\nUrsache: Kompilierung fehlgeschlagen.")
         return
 
+    print("\n-> Aktualisiere Web-Portal Dateien...")
+    try:
+        from .diagrammphp import DiagramInstaller
+        installer = DiagramInstaller()
+        installer.install_webportal_from_repo()
+    except Exception as e:
+        print(f"[!] Web-Portal-Update fehlerhaft: {e}")
+        log_warning("update", f"Fehler beim Webportal-Update: {e}")
+
     # Berechtigungen korrigieren
-    print("\n→ Korrigiere Berechtigungen nach Update…")
+    print("\n-> Korrigiere Berechtigungen nach Update…")
     from .permissions import run_permissions_wizard
     run_permissions_wizard(headless=headless)
 
     # Neustart mit gestopptem Service
     config_file = os.path.join(INSTALL_PATH, "e3dc.config.txt")
     if os.path.exists(config_file):
-        print("→ Neustart mit Konfiguration…")
+        print("-> Neustart mit Konfiguration…")
         replace_in_file(config_file, "stop", "stop = 1")
         time.sleep(5)
         replace_in_file(config_file, "stop", "stop = 0")
 
-    print("✓ Update erfolgreich abgeschlossen.\n")
+    print("[OK] Update erfolgreich abgeschlossen.\n")
     log_task_completed("E3DC-Control aktualisieren", details=f"Von {old_version[:7]} zu {latest_version[:7]}")
 
     # Telegram Benachrichtigung senden (falls vorhanden)
     if old_version != latest_version:
-        send_telegram_notification(f"✅ E3DC-Control Update erfolgreich!\nVon: {old_version[:7]}\nZu: {latest_version[:7]}")
+        send_telegram_notification(f"[OK] E3DC-Control Update erfolgreich!\nVon: {old_version[:7]}\nZu: {latest_version[:7]}")
 
     # Stash-Management
     result = run_command(f"sudo -u {install_user} git -C {INSTALL_PATH} stash list")
@@ -292,12 +301,12 @@ def update_e3dc(headless=False):
         if headless:
             restore = True # Im Headless-Modus automatisch wiederherstellen
         else:
-            restore = input("→ Lokale Änderungen wiederherstellen? (j/n): ").strip().lower() == "j"
+            restore = input("-> Lokale Änderungen wiederherstellen? (j/n): ").strip().lower() == "j"
         
         if restore:
-            print("→ Stelle Änderungen wieder her (git stash pop)…")
+            print("-> Stelle Änderungen wieder her (git stash pop)…")
             run_command(f"sudo -u {install_user} git -C {INSTALL_PATH} stash pop", timeout=30)
-            print("✓ Änderungen wiederhergestellt.\n")
+            print("[OK] Änderungen wiederhergestellt.\n")
             update_logger.info("Lokale Änderungen (stash) nach Update wiederhergestellt.")
 
 

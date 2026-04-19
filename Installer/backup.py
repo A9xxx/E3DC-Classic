@@ -60,7 +60,7 @@ def backup_current_version():
         os.makedirs(backup_dir, exist_ok=True)
         total_copied_files = 0
 
-        print(f"→ Erstelle Backup unter {backup_dir}…")
+        print(f"-> Erstelle Backup unter {backup_dir}…")
 
         # Hauptprogramm sichern
         bin_path = os.path.join(INSTALL_PATH, "E3DC-Control")
@@ -68,10 +68,10 @@ def backup_current_version():
             try:
                 shutil.copy2(bin_path, backup_dir)
                 total_copied_files += 1
-                print("  ✓ Hauptprogramm gesichert")
+                print("  [OK] Hauptprogramm gesichert")
                 backup_logger.info("Hauptprogramm 'E3DC-Control' gesichert.")
             except Exception as e:
-                print(f"  ⚠ Fehler beim Sichern des Programms: {e}")
+                print(f"  [!] Fehler beim Sichern des Programms: {e}")
                 log_error("backup", f"Fehler beim Sichern des Programms: {e}", e)
 
         # Alle Konfigurationsdateien sichern
@@ -82,10 +82,10 @@ def backup_current_version():
                 try:
                     shutil.copy2(cfg_path, backup_dir)
                     total_copied_files += 1
-                    print(f"  ✓ {cfg} gesichert")
+                    print(f"  [OK] {cfg} gesichert")
                     backup_logger.info(f"Konfiguration '{cfg}' gesichert.")
                 except Exception as e:
-                    print(f"  ⚠ Fehler beim Sichern von {cfg}: {e}")
+                    print(f"  [!] Fehler beim Sichern von {cfg}: {e}")
                     log_error("backup", f"Fehler beim Sichern von {cfg}: {e}", e)
 
         # e3dc_paths.json aus Webverzeichnis sichern (WICHTIG)
@@ -94,7 +94,7 @@ def backup_current_version():
             try:
                 shutil.copy2(paths_json, backup_dir)
                 total_copied_files += 1
-                print(f"  ✓ e3dc_paths.json gesichert")
+                print(f"  [OK] e3dc_paths.json gesichert")
                 backup_logger.info("e3dc_paths.json gesichert.")
             except Exception as e:
                 log_warning("backup", f"Konnte e3dc_paths.json nicht sichern: {e}")
@@ -105,7 +105,7 @@ def backup_current_version():
         webroot_dir = "/var/www/html"
 
         if not os.path.isdir(webroot_dir):
-            print(f"  ⚠ Quellordner fehlt: {webroot_dir}")
+            print(f"  [!] Quellordner fehlt: {webroot_dir}")
             log_warning("backup", f"Quellordner für Backup fehlt: {webroot_dir}")
         else:
             try:
@@ -116,13 +116,13 @@ def backup_current_version():
                 )
                 total_copied_files += copied_webportal
                 if copied_webportal > 0:
-                    print(f"  ✓ {copied_webportal} Webportal-Dateien gesichert")
+                    print(f"  [OK] {copied_webportal} Webportal-Dateien gesichert")
                     backup_logger.info(f"{copied_webportal} Webportal-Dateien gesichert.")
                 else:
-                    print("  ⚠ Keine passenden Webportal-Dateien gefunden")
+                    print("  [!] Keine passenden Webportal-Dateien gefunden")
                     backup_logger.warning("Keine passenden Webportal-Dateien für Backup gefunden.")
             except Exception as e:
-                print(f"  ⚠ Fehler beim Sichern der Webportal-Dateien: {e}")
+                print(f"  [!] Fehler beim Sichern der Webportal-Dateien: {e}")
                 log_error("backup", f"Fehler beim Sichern der Webportal-Dateien: {e}", e)
         
         # E3DC-Control-Zusatzdateien sichern
@@ -141,16 +141,16 @@ def backup_current_version():
                 )
                 total_copied_files += copied_e3dc
                 if copied_e3dc > 0:
-                    print(f"  ✓ {copied_e3dc} E3DC-Control-Zusatzdateien gesichert")
+                    print(f"  [OK] {copied_e3dc} E3DC-Control-Zusatzdateien gesichert")
                     backup_logger.info(f"{copied_e3dc} E3DC-Control-Zusatzdateien gesichert.")
                 else:
-                    print("  ⚠ Keine passenden E3DC-Control-Zusatzdateien gefunden")
+                    print("  [!] Keine passenden E3DC-Control-Zusatzdateien gefunden")
                     backup_logger.warning("Keine passenden E3DC-Control-Zusatzdateien für Backup gefunden.")
             except Exception as e:
-                print(f"  ⚠ Fehler beim Sichern der E3DC-Control-Zusatzdateien: {e}")
+                print(f"  [!] Fehler beim Sichern der E3DC-Control-Zusatzdateien: {e}")
                 log_error("backup", f"Fehler beim Sichern der E3DC-Control-Zusatzdateien: {e}", e)
         else:
-            print(f"  ⚠ Quellordner fehlt: {e3dc_source_dir}")
+            print(f"  [!] Quellordner fehlt: {e3dc_source_dir}")
             log_warning("backup", f"Quellordner für Backup fehlt: {e3dc_source_dir}")
 
         # Installer-Datei sichern
@@ -169,7 +169,7 @@ def backup_current_version():
             try:
                 shutil.copy2(installer_config, backup_dir)
                 backup_logger.info("installer_config.json gesichert.")
-                print("  ✓ Installer-Konfiguration gesichert")
+                print("  [OK] Installer-Konfiguration gesichert")
                 total_copied_files += 1
             except Exception as e:
                 log_warning("backup", f"Konnte installer_config.json nicht sichern: {e}")
@@ -187,10 +187,10 @@ def backup_current_version():
                 try:
                     shutil.copy2(wd_file, wd_backup_dir)
                     total_copied_files += 1
-                    print(f"  ✓ {os.path.basename(wd_file)} gesichert")
+                    print(f"  [OK] {os.path.basename(wd_file)} gesichert")
                     backup_logger.info(f"Watchdog-Datei gesichert: {wd_file}")
                 except Exception as e:
-                    print(f"  ⚠ Fehler beim Sichern von {wd_file}: {e}")
+                    print(f"  [!] Fehler beim Sichern von {wd_file}: {e}")
                     log_warning("backup", f"Fehler beim Sichern von {wd_file}: {e}")
 
         # Systemd Services sichern
@@ -206,10 +206,10 @@ def backup_current_version():
                 try:
                     shutil.copy2(srv_file, service_backup_dir)
                     total_copied_files += 1
-                    print(f"  ✓ {os.path.basename(srv_file)} gesichert")
+                    print(f"  [OK] {os.path.basename(srv_file)} gesichert")
                     backup_logger.info(f"Service-Datei gesichert: {srv_file}")
                 except Exception as e:
-                    print(f"  ⚠ Fehler beim Sichern von {srv_file}: {e}")
+                    print(f"  [!] Fehler beim Sichern von {srv_file}: {e}")
                     log_warning("backup", f"Fehler beim Sichern von {srv_file}: {e}")
 
         # Rechte des Backups auf den Installationsbenutzer setzen
@@ -224,24 +224,24 @@ def backup_current_version():
                 for f in files:
                     os.chown(os.path.join(root, f), uid, gid)
             os.chown(backup_dir, uid, gid)
-            print("  ✓ Besitzrechte auf install_user:www-data gesetzt")
+            print("  [OK] Besitzrechte auf install_user:www-data gesetzt")
             backup_logger.info("Besitzrechte für Backup-Ordner gesetzt.")
         except Exception as e:
-            print(f"  ⚠ Konnte Besitzrechte für Backup nicht setzen: {e}")
+            print(f"  [!] Konnte Besitzrechte für Backup nicht setzen: {e}")
             log_warning("backup", f"Konnte Besitzrechte für Backup nicht setzen: {e}")
 
         if total_copied_files == 0:
-            print("  ⚠ Es wurden keine Dateien gesichert")
+            print("  [!] Es wurden keine Dateien gesichert")
             backup_logger.warning("Es wurden keine Dateien gesichert.")
         else:
-            print(f"  ✓ Insgesamt {total_copied_files} Dateien gesichert")
+            print(f"  [OK] Insgesamt {total_copied_files} Dateien gesichert")
             backup_logger.info(f"Insgesamt {total_copied_files} Dateien gesichert.")
 
-        print("✓ Backup abgeschlossen.\n")
+        print("[OK] Backup abgeschlossen.\n")
         log_task_completed("Backup erstellen", details=f"{total_copied_files} Dateien in {os.path.basename(backup_dir)}")
         return backup_dir
     except Exception as e:
-        print(f"✗ Fehler beim Backup: {e}\n")
+        print(f"[Err] Fehler beim Backup: {e}\n")
         log_error("backup", f"Genereller Fehler beim Backup: {e}", e)
         return None
 
@@ -250,19 +250,19 @@ def choose_backup_version(action_text="wiederherstellen"):
     """Wählt eine Backup-Version für die angegebene Aktion aus."""
     backup_root = os.path.join(INSTALL_PATH, "backups")
     if not os.path.exists(backup_root):
-        print("✗ Keine Backups vorhanden.\n")
+        print("[Err] Keine Backups vorhanden.\n")
         backup_logger.warning("Kein Backup-Verzeichnis gefunden.")
         return None
 
     try:
         versions = sorted(os.listdir(backup_root))
     except Exception as e:
-        print(f"✗ Fehler beim Lesen der Backups: {e}\n")
+        print(f"[Err] Fehler beim Lesen der Backups: {e}\n")
         log_error("backup", f"Fehler beim Lesen des Backup-Verzeichnisses: {e}", e)
         return None
 
     if not versions:
-        print("✗ Keine Backups vorhanden.\n")
+        print("[Err] Keine Backups vorhanden.\n")
         return None
 
     print("\nVerfügbare Backups:")
@@ -271,31 +271,31 @@ def choose_backup_version(action_text="wiederherstellen"):
 
     choice = input(f"\nWelche Version {action_text}? (Nummer): ").strip()
     if not choice.isdigit():
-        print("✗ Ungültige Eingabe.\n")
+        print("[Err] Ungültige Eingabe.\n")
         return None
 
     try:
         idx = int(choice) - 1
         if idx < 0 or idx >= len(versions):
-            print("✗ Ungültige Auswahl.\n")
+            print("[Err] Ungültige Auswahl.\n")
             return None
         return os.path.join(backup_root, versions[idx])
     except (ValueError, IndexError):
-        print("✗ Fehler bei der Auswahl.\n")
+        print("[Err] Fehler bei der Auswahl.\n")
         return None
 
 
 def restore_backup(backup_path):
     """Stellt eine Backup-Version wieder her."""
-    print(f"\n⚠ Willst du wirklich {os.path.basename(backup_path)} wiederherstellen?")
+    print(f"\n[!] Willst du wirklich {os.path.basename(backup_path)} wiederherstellen?")
     confirm = input("Ja/Nein [n]: ").strip().lower()
     if confirm != "ja":
-        print("✗ Abgebrochen.\n")
+        print("[Err] Abgebrochen.\n")
         return False
 
     try:
         backup_logger.info(f"Starte Wiederherstellung von: {os.path.basename(backup_path)}")
-        print("→ Stelle Backup wieder her…")
+        print("-> Stelle Backup wieder her…")
         total_restored_files = 0
 
         # Hauptprogramm wiederherstellen
@@ -305,10 +305,10 @@ def restore_backup(backup_path):
                 bin_dest = os.path.join(INSTALL_PATH, "E3DC-Control")
                 shutil.copy2(bin_backup, bin_dest)
                 total_restored_files += 1
-                print("  ✓ Hauptprogramm wiederhergestellt")
+                print("  [OK] Hauptprogramm wiederhergestellt")
                 backup_logger.info("Hauptprogramm wiederhergestellt.")
             except Exception as e:
-                print(f"  ✗ Fehler: {e}")
+                print(f"  [Err] Fehler: {e}")
                 log_error("backup", f"Fehler beim Wiederherstellen des Hauptprogramms: {e}", e)
 
         # Konfigurationen wiederherstellen (Config, Strompreis, Diagramm)
@@ -320,10 +320,10 @@ def restore_backup(backup_path):
                     cfg_dest = os.path.join(INSTALL_PATH, cfg)
                     shutil.copy2(cfg_backup, cfg_dest)
                     total_restored_files += 1
-                    print(f"  ✓ {cfg} wiederhergestellt")
+                    print(f"  [OK] {cfg} wiederhergestellt")
                     backup_logger.info(f"{cfg} wiederhergestellt.")
                 except Exception as e:
-                    print(f"  ✗ Fehler bei {cfg}: {e}")
+                    print(f"  [Err] Fehler bei {cfg}: {e}")
                     log_error("backup", f"Fehler beim Wiederherstellen von {cfg}: {e}", e)
 
         # e3dc_paths.json wiederherstellen
@@ -332,10 +332,10 @@ def restore_backup(backup_path):
             try:
                 shutil.copy2(paths_backup, "/var/www/html/e3dc_paths.json")
                 total_restored_files += 1
-                print("  ✓ e3dc_paths.json wiederhergestellt")
+                print("  [OK] e3dc_paths.json wiederhergestellt")
                 backup_logger.info("e3dc_paths.json wiederhergestellt.")
             except Exception as e:
-                print(f"  ✗ Fehler bei e3dc_paths.json: {e}")
+                print(f"  [Err] Fehler bei e3dc_paths.json: {e}")
                 log_error("backup", f"Fehler bei e3dc_paths.json: {e}", e)
 
         # Installer-Konfiguration wiederherstellen
@@ -346,16 +346,16 @@ def restore_backup(backup_path):
                 target_dir = os.path.dirname(os.path.abspath(__file__))
                 shutil.copy2(inst_cfg_backup, os.path.join(target_dir, "installer_config.json"))
                 total_restored_files += 1
-                print("  ✓ Installer-Konfiguration wiederhergestellt")
+                print("  [OK] Installer-Konfiguration wiederhergestellt")
                 backup_logger.info("installer_config.json wiederhergestellt.")
             except Exception as e:
-                print(f"  ✗ Fehler bei installer_config.json: {e}")
+                print(f"  [Err] Fehler bei installer_config.json: {e}")
                 log_error("backup", f"Fehler bei installer_config.json: {e}", e)
 
         # Systemd Services wiederherstellen
         service_backup_dir = os.path.join(backup_path, "services")
         if os.path.exists(service_backup_dir):
-            print("\n→ Systemd Services wiederherstellen…")
+            print("\n-> Systemd Services wiederherstellen…")
             restored_srv = 0
             for filename in os.listdir(service_backup_dir):
                 src = os.path.join(service_backup_dir, filename)
@@ -366,9 +366,9 @@ def restore_backup(backup_path):
                     os.chown(dest, 0, 0)
                     os.chmod(dest, 0o644)
                     restored_srv += 1
-                    print(f"  ✓ {filename} wiederhergestellt")
+                    print(f"  [OK] {filename} wiederhergestellt")
                 except Exception as e:
-                    print(f"  ✗ Fehler bei {filename}: {e}")
+                    print(f"  [Err] Fehler bei {filename}: {e}")
                     log_error("backup", f"Fehler bei Service-Restore {filename}: {e}", e)
             
             if restored_srv > 0:
@@ -382,7 +382,7 @@ def restore_backup(backup_path):
         # Watchdog wiederherstellen
         wd_backup_dir = os.path.join(backup_path, "watchdog")
         if os.path.exists(wd_backup_dir):
-            print("\n→ Watchdog-Konfiguration wiederherstellen…")
+            print("\n-> Watchdog-Konfiguration wiederherstellen…")
             restored_wd = 0
             for filename in os.listdir(wd_backup_dir):
                 src = os.path.join(wd_backup_dir, filename)
@@ -393,9 +393,9 @@ def restore_backup(backup_path):
                     os.chown(dest, 0, 0)
                     os.chmod(dest, 0o755)
                     restored_wd += 1
-                    print(f"  ✓ {filename} wiederhergestellt")
+                    print(f"  [OK] {filename} wiederhergestellt")
                 except Exception as e:
-                    print(f"  ✗ Fehler bei {filename}: {e}")
+                    print(f"  [Err] Fehler bei {filename}: {e}")
                     log_error("backup", f"Fehler bei Watchdog-Restore {filename}: {e}", e)
             
             if restored_wd > 0:
@@ -403,12 +403,12 @@ def restore_backup(backup_path):
                 # Service neu starten
                 if os.path.exists("/etc/systemd/system/piguard.service"):
                     run_command("systemctl restart piguard")
-                    print("  ✓ Watchdog-Service neu gestartet")
+                    print("  [OK] Watchdog-Service neu gestartet")
 
         # Webportal-Dateien wiederherstellen
         wp_backup_dir = os.path.join(backup_path, "webportal")
         if os.path.exists(wp_backup_dir):
-            choice = input("\n→ Webportal-Dateien wiederherstellen? (j/n): ").strip().lower()
+            choice = input("\n-> Webportal-Dateien wiederherstellen? (j/n): ").strip().lower()
             if choice == "j":
                 restored_webportal_count = 0
                 for filename in os.listdir(wp_backup_dir):
@@ -422,16 +422,16 @@ def restore_backup(backup_path):
                             shutil.copy2(src, dst)
                             restored_webportal_count += 1
                     except Exception as e:
-                        print(f"  ⚠ {filename}: {e}")
+                        print(f"  [!] {filename}: {e}")
                         log_warning("backup", f"Fehler bei Wiederherstellung von {filename}: {e}")
                 total_restored_files += restored_webportal_count
                 
                 # Berechtigungen nach Restore korrigieren
-                print("\n→ Korrigiere Berechtigungen nach Wiederherstellung…")
+                print("\n-> Korrigiere Berechtigungen nach Wiederherstellung…")
                 from .permissions import run_permissions_wizard
                 run_permissions_wizard()
                 
-                print("  ✓ Webportal-Dateien wiederhergestellt")
+                print("  [OK] Webportal-Dateien wiederhergestellt")
                 backup_logger.info(f"{restored_webportal_count} Webportal-Dateien wiederhergestellt.")
 
         # E3DC-Control-Zusatzdateien wiederherstellen
@@ -449,24 +449,24 @@ def restore_backup(backup_path):
                         shutil.copy2(src, dst)
                         restored_count += 1
                     except Exception as e:
-                        print(f"  ⚠ Fehler bei E3DC-Control-Zusatzdatei {rel_path}: {e}")
+                        print(f"  [!] Fehler bei E3DC-Control-Zusatzdatei {rel_path}: {e}")
                         log_warning("backup", f"Fehler bei Wiederherstellung von Zusatzdatei {rel_path}: {e}")
             total_restored_files += restored_count
-            print(f"  ✓ {restored_count} E3DC-Control-Zusatzdateien wiederhergestellt")
+            print(f"  [OK] {restored_count} E3DC-Control-Zusatzdateien wiederhergestellt")
             backup_logger.info(f"{restored_count} E3DC-Control-Zusatzdateien wiederhergestellt.")
 
         if total_restored_files == 0:
-            print("  ⚠ Es wurden keine Dateien wiederhergestellt")
+            print("  [!] Es wurden keine Dateien wiederhergestellt")
             backup_logger.warning("Es wurden keine Dateien wiederhergestellt.")
         else:
-            print(f"  ✓ Insgesamt {total_restored_files} Dateien wiederhergestellt")
+            print(f"  [OK] Insgesamt {total_restored_files} Dateien wiederhergestellt")
             backup_logger.info(f"Insgesamt {total_restored_files} Dateien wiederhergestellt.")
 
-        print("✓ Wiederherstellung abgeschlossen.\n")
+        print("[OK] Wiederherstellung abgeschlossen.\n")
         log_task_completed("Backup wiederherstellen", details=f"{total_restored_files} Dateien aus {os.path.basename(backup_path)}")
         return True
     except Exception as e:
-        print(f"✗ Fehler bei Wiederherstellung: {e}\n")
+        print(f"[Err] Fehler bei Wiederherstellung: {e}\n")
         log_error("backup", f"Genereller Fehler bei Wiederherstellung: {e}", e)
         return False
 
@@ -478,23 +478,23 @@ def delete_backup():
         return False
 
     if not os.path.isdir(backup_path):
-        print("✗ Ungültiges Backup-Verzeichnis.\n")
+        print("[Err] Ungültiges Backup-Verzeichnis.\n")
         return False
 
-    print(f"\n⚠ Willst du wirklich das Backup {os.path.basename(backup_path)} löschen?")
+    print(f"\n[!] Willst du wirklich das Backup {os.path.basename(backup_path)} löschen?")
     confirm = input("Ja/Nein [n]: ").strip().lower()
     if confirm != "ja":
-        print("✗ Abgebrochen.\n")
+        print("[Err] Abgebrochen.\n")
         return False
 
     try:
         shutil.rmtree(backup_path)
-        print("✓ Backup gelöscht.\n")
+        print("[OK] Backup gelöscht.\n")
         backup_logger.info(f"Backup gelöscht: {os.path.basename(backup_path)}")
         log_task_completed("Backup löschen", details=os.path.basename(backup_path))
         return True
     except Exception as e:
-        print(f"✗ Fehler beim Löschen des Backups: {e}\n")
+        print(f"[Err] Fehler beim Löschen des Backups: {e}\n")
         log_error("backup", f"Fehler beim Löschen des Backups: {e}", e)
         return False
 
@@ -521,7 +521,7 @@ def backup_menu():
     elif choice == "3":
         delete_backup()
     else:
-        print("✗ Ungültige Auswahl.\n")
+        print("[Err] Ungültige Auswahl.\n")
 
 
 register_command("16", "Backup verwalten", backup_menu, sort_order=160)

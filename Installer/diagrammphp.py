@@ -103,10 +103,10 @@ class DiagramInstaller:
                 text=True
             )
             python_version = result.stdout.strip()
-            print(f"✓ {python_version}")
+            print(f"[OK] {python_version}")
             return True
         except FileNotFoundError:
-            print("❌ Python 3 nicht gefunden!")
+            print("[Err] Python 3 nicht gefunden!")
             log_error("diagramm", "Python 3 nicht gefunden.")
             return False
 
@@ -118,7 +118,7 @@ class DiagramInstaller:
     def install_webportal_from_repo(self):
         """
         Kopiert Diagramm-System-Dateien aus lokalen Ordnern.
-        - PHP/HTML Web-Portal-Dateien → /var/www/html/
+        - PHP/HTML Web-Portal-Dateien -> /var/www/html/
         - Erstellt /var/www/html/tmp/
         - Setzt Rechte für www-data
         """
@@ -130,12 +130,12 @@ class DiagramInstaller:
         base_dir = os.path.dirname(script_dir)
         try:
                 # Web-Portal Dateien rekursiv nach /var/www/html/ kopieren
-                print("\n→ Kopiere Web-Portal-Dateien (PHP, CSS, JS, Icons)...")
+                print("\n-> Kopiere Web-Portal-Dateien (PHP, CSS, JS, Icons)...")
                 html_source = os.path.join(base_dir, "html")
                 
                 if not os.path.isdir(html_source):
                     log_warning("diagramm", f"Kein 'html'-Ordner unter {base_dir} gefunden.")
-                    print(f"⚠️  Kein 'html'-Ordner im Repository gefunden ({html_source})")
+                    print(f"[!]️  Kein 'html'-Ordner im Repository gefunden ({html_source})")
                 else:
                     # Sicherung der e3dc_paths.json
                     paths_config_to_preserve = None
@@ -145,15 +145,15 @@ class DiagramInstaller:
                             with open(paths_config_path, 'r', encoding='utf-8') as f:
                                 paths_config_to_preserve = f.read()
                             diagramm_logger.info("e3dc_paths.json gesichert.")
-                            print("  → Sichern der e3dc_paths.json")
+                            print("  -> Sichern der e3dc_paths.json")
                         except Exception as e:
-                            print(f"  ⚠️  Sicherung der e3dc_paths.json fehlgeschlagen: {e}")
+                            print(f"  [!]️  Sicherung der e3dc_paths.json fehlgeschlagen: {e}")
 
                     try:
                         # Modernes shutil.copytree zum Zusammenführen der Verzeichnisse
                         shutil.copytree(html_source, WWW_PATH, dirs_exist_ok=True)
                         diagramm_logger.info(f"Webportal-Dateien nach {WWW_PATH} kopiert.")
-                        print(f"✓ Dateien und Unterordner (icons) → {WWW_PATH}")
+                        print(f"[OK] Dateien und Unterordner (icons) -> {WWW_PATH}")
 
                         # Wiederherstellen der e3dc_paths.json
                         if paths_config_to_preserve:
@@ -161,12 +161,12 @@ class DiagramInstaller:
                                 with open(paths_config_path, 'w', encoding='utf-8') as f:
                                     f.write(paths_config_to_preserve)
                                 diagramm_logger.info("e3dc_paths.json wiederhergestellt.")
-                                print("  ✓ Wiederherstellen der e3dc_paths.json")
+                                print("  [OK] Wiederherstellen der e3dc_paths.json")
                             except Exception as e:
-                                print(f"  ⚠️  Wiederherstellen der e3dc_paths.json fehlgeschlagen: {e}")
+                                print(f"  [!]️  Wiederherstellen der e3dc_paths.json fehlgeschlagen: {e}")
                     except Exception as e:
                         log_error("diagramm", f"Fehler beim Kopieren des Webportal-Ordners: {e}", e)
-                        print(f"⚠️  Fehler beim Kopieren des Webportal-Ordners: {e}")
+                        print(f"[!]️  Fehler beim Kopieren des Webportal-Ordners: {e}")
                 
                 # 2b) Veraltete Dateien im Web-Verzeichnis bereinigen
                 for obs_file in OBSOLETE_WEB_FILES:
@@ -175,22 +175,22 @@ class DiagramInstaller:
                         try:
                             os.remove(obs_path)
                             diagramm_logger.info(f"Veraltete Datei entfernt: {obs_path}")
-                            print(f"✓ Veraltete Datei entfernt: {obs_path}")
+                            print(f"[OK] Veraltete Datei entfernt: {obs_path}")
                         except Exception as e:
                             log_warning("diagramm", f"Konnte veraltete Datei {obs_file} nicht entfernen: {e}")
-                            print(f"⚠️  Konnte veraltete Datei {obs_file} nicht entfernen: {e}")
+                            print(f"[!]️  Konnte veraltete Datei {obs_file} nicht entfernen: {e}")
 
                 # 3) /var/www/html/tmp/ und icons/ Berechtigungen sicherstellen
-                print("\n→ Überprüfe Verzeichnisstrukturen...")
+                print("\n-> Überprüfe Verzeichnisstrukturen...")
                 os.makedirs(TMP_PATH, exist_ok=True)
                 # Backup-Verzeichnis für Historie erstellen
                 history_backups_path = os.path.join(TMP_PATH, "history_backups")
                 os.makedirs(history_backups_path, exist_ok=True)
                 diagramm_logger.info(f"tmp-Ordner und Unterordner sichergestellt: {TMP_PATH}")
-                print(f"✓ tmp-Ordner sichergestellt: {TMP_PATH}")
+                print(f"[OK] tmp-Ordner sichergestellt: {TMP_PATH}")
                 
                 # 4) Rechte für das gesamte Webportal setzen (install_user:www-data, 775)
-                print("\n→ Setze Berechtigungen...")
+                print("\n-> Setze Berechtigungen...")
                 try:
                     # Besitzer auf install_user:www-data setzen (-R für alles inkl. icons/)
                     subprocess.run(
@@ -219,21 +219,21 @@ class DiagramInstaller:
                     subprocess.run(["sudo", "chown", f"{self.install_user}:www-data", history_backups_path], check=True, capture_output=True)
                     subprocess.run(["sudo", "chmod", "775", history_backups_path], check=True, capture_output=True)
                     
-                    print(f"✓ Besitzer für alle Dateien: {self.install_user}:www-data")
-                    print(f"✓ Rechte gesetzt (Ordner 775, Dateien 664)")
+                    print(f"[OK] Besitzer für alle Dateien: {self.install_user}:www-data")
+                    print(f"[OK] Rechte gesetzt (Ordner 775, Dateien 664)")
                     
                     diagramm_logger.info("Berechtigungen für Webportal gesetzt.")
                 except Exception as e:
                     log_warning("diagramm", f"Berechtigungen konnten nicht gesetzt werden: {e}")
-                    print(f"⚠️  Berechtigungen konnten nicht gesetzt werden: {e}")
+                    print(f"[!]️  Berechtigungen konnten nicht gesetzt werden: {e}")
                 
-                print("\n✓ Installation abgeschlossen")
+                print("\n[OK] Installation abgeschlossen")
                 log_task_completed("Diagramm-System installieren")
                 return True
             
         except Exception as e:
             log_error("diagramm", f"Fehler bei der Installation: {str(e)}", e)
-            print(f"❌ Fehler bei der Installation: {str(e)}")
+            print(f"[Err] Fehler bei der Installation: {str(e)}")
             return False
 
     def ensure_update_check_config(self):
@@ -253,7 +253,7 @@ class DiagramInstaller:
                     break
             
             if not key_found:
-                print("→ Setze Standardwert: check_updates = 1")
+                print("-> Setze Standardwert: check_updates = 1")
                 with open(config_path, "a") as f:
                     f.write("\ncheck_updates = 1\n")
                 
@@ -264,7 +264,7 @@ class DiagramInstaller:
                 except:
                     pass
         except Exception as e:
-            print(f"⚠️  Konnte check_updates nicht setzen: {e}")
+            print(f"[!]️  Konnte check_updates nicht setzen: {e}")
 
     def configure_web_sudoers(self):
         """
@@ -311,10 +311,10 @@ class DiagramInstaller:
                 
                 if result.returncode == 0:
                     if all(line in result.stdout for line in lines):
-                        print(f"✓ Sudo-Rechte ({desc}) bereits vorhanden.")
+                        print(f"[OK] Sudo-Rechte ({desc}) bereits vorhanden.")
                         continue
 
-                print(f"→ Aktualisiere {path} ({desc})...")
+                print(f"-> Aktualisiere {path} ({desc})...")
                 
                 # Via subprocess und tee schreiben
                 cmd = f"printf '{content}' | sudo tee {path} > /dev/null"
@@ -323,12 +323,12 @@ class DiagramInstaller:
                 # Rechte setzen (0440)
                 subprocess.run(["sudo", "chmod", "0440", path], check=True)
                 
-                print(f"✓ Sudo-Rechte eingerichtet: {desc}")
+                print(f"[OK] Sudo-Rechte eingerichtet: {desc}")
                 diagramm_logger.info(f"Sudoers-Datei aktualisiert: {path}")
                 
             except Exception as e:
                 log_error("diagramm", f"Fehler beim Einrichten der sudo-Rechte ({desc}): {e}", e)
-                print(f"❌ Fehler beim Einrichten der sudo-Rechte ({desc}): {e}")
+                print(f"[Err] Fehler beim Einrichten der sudo-Rechte ({desc}): {e}")
                 all_success = False
                 
         return all_success
@@ -348,14 +348,14 @@ class DiagramInstaller:
                 try:
                     shutil.rmtree(candidate)
                     diagramm_logger.info(f"Alter Modul-Ordner entfernt: {candidate}")
-                    print(f"✓ Entfernt: {candidate}")
+                    print(f"[OK] Entfernt: {candidate}")
                     removed += 1
                 except Exception as e:
                     log_warning("diagramm", f"Konnte alten Modul-Ordner nicht entfernen: {candidate} ({e})")
-                    print(f"⚠️  Konnte nicht entfernen: {candidate} ({e})")
+                    print(f"[!]️  Konnte nicht entfernen: {candidate} ({e})")
 
         if removed == 0:
-            print("✓ Keine alten Modul-Ordner gefunden")
+            print("[OK] Keine alten Modul-Ordner gefunden")
     
     def print_header(self):
         """ASCII-Header"""
@@ -408,10 +408,10 @@ class DiagramInstaller:
             self.diagram_mode = "hybrid"
             self.auto_interval = self._select_interval()
         else:
-            print("❌ Ungültige Auswahl, verwende MANUAL als default")
+            print("[Err] Ungültige Auswahl, verwende MANUAL als default")
             self.diagram_mode = "manual"
         
-        print(f"\n✓ Modus: {self.diagram_mode.upper()}")
+        print(f"\n[OK] Modus: {self.diagram_mode.upper()}")
         if self.diagram_mode in ("auto", "hybrid"):
             diagramm_logger.info(f"Diagramm-Modus gewählt: {self.diagram_mode}, Intervall: {self.auto_interval} Min.")
             print(f"  Auto-Update: Alle {self.auto_interval} Minuten")
@@ -439,9 +439,9 @@ class DiagramInstaller:
                     if 1 <= minutes <= 1440:  # Max 24 Stunden
                         return minutes
                     else:
-                        print("⚠ Bitte Wert zwischen 1 und 1440 eingeben")
+                        print("[!] Bitte Wert zwischen 1 und 1440 eingeben")
                 except ValueError:
-                    print("⚠ Ungültige Eingabe, bitte Zahl eingeben")
+                    print("[!] Ungültige Eingabe, bitte Zahl eingeben")
         
         return intervals.get(choice, 5)
     
@@ -463,7 +463,7 @@ class DiagramInstaller:
             self.enable_heatpump = False
         
         diagramm_logger.info(f"Diagramm-Features: Wärmepumpe={self.enable_heatpump}")
-        print(f"\n✓ Wärmepumpe: {self.enable_heatpump}")
+        print(f"\n[OK] Wärmepumpe: {self.enable_heatpump}")
     
     # ============================================================
     # CRONTAB MANAGEMENT
@@ -522,10 +522,10 @@ class DiagramInstaller:
             
             if process.returncode != 0:
                 log_error("diagramm", f"Fehler beim Einrichten des crontab: {stderr}")
-                print(f"❌ Fehler beim Einrichten des crontab: {stderr}")
+                print(f"[Err] Fehler beim Einrichten des crontab: {stderr}")
                 return False
             
-            print(f"✓ Crontab eingerichtet:")
+            print(f"[OK] Crontab eingerichtet:")
             if cron_line_plot:
                 diagramm_logger.info(f"Cronjob für Plot-Skript eingerichtet: {cron_schedule_plot}")
                 print(f"  Plot-Skript: {cron_schedule_plot} {plot_script}")
@@ -548,7 +548,7 @@ class DiagramInstaller:
             )
             
             if result.returncode != 0:
-                print("ℹ️  Kein Crontab gefunden")
+                print("[i]  Kein Crontab gefunden")
                 return True
             
             # Entferne E3DC-Einträge
@@ -574,7 +574,7 @@ class DiagramInstaller:
             process.communicate(new_crons_text)
             
             diagramm_logger.info("Crontab-Einträge entfernt.")
-            print("✓ Crontab-Eintrag entfernt")
+            print("[OK] Crontab-Eintrag entfernt")
             return True
         
         except Exception as e:
@@ -620,12 +620,12 @@ class DiagramInstaller:
                 os.chmod(self.config_file, 0o664)
             except Exception as e:
                 log_warning("diagramm", f"Konnte Berechtigungen für {self.config_file} nicht setzen: {e}")
-            print(f"\n✓ Konfiguration gespeichert: {self.config_file}")
+            print(f"\n[OK] Konfiguration gespeichert: {self.config_file}")
             diagramm_logger.info(f"Konfiguration gespeichert: {self.config_file}")
             return True
         except Exception as e:
             log_error("diagramm", f"Fehler beim Speichern der Konfiguration: {str(e)}", e)
-            print(f"❌ Fehler beim Speichern der Konfiguration: {str(e)}")
+            print(f"[Err] Fehler beim Speichern der Konfiguration: {str(e)}")
             return False
     
     def load_config(self):
@@ -643,7 +643,7 @@ class DiagramInstaller:
             return True
         except Exception as e:
             log_warning("diagramm", f"Fehler beim Laden der Konfiguration: {str(e)}")
-            print(f"⚠️  Fehler beim Laden der Konfiguration: {str(e)}")
+            print(f"[!]️  Fehler beim Laden der Konfiguration: {str(e)}")
             return False
     
     # ============================================================
@@ -656,7 +656,7 @@ class DiagramInstaller:
         
         # 0) Python-Umgebung prüfen (IMMER ZUERST)
         if not self.check_python_requirements():
-            print("\n❌ Installation abgebrochen: Python-Requirements fehlen")
+            print("\n[Err] Installation abgebrochen: Python-Requirements fehlen")
             log_error("diagramm", "Installation abgebrochen: Python-Requirements fehlen.")
             return False
         
@@ -680,7 +680,7 @@ class DiagramInstaller:
                 return False
             elif choice == "2":
                 if not self.install_webportal_from_repo():
-                    print("❌ Installation fehlgeschlagen")
+                    print("[Err] Installation fehlgeschlagen")
                     log_error("diagramm", "Neuinstallation fehlgeschlagen.")
                     return False
             elif choice == "3":
@@ -701,7 +701,7 @@ class DiagramInstaller:
                 return False
             
             if not self.install_webportal_from_repo():
-                print("❌ Installation fehlgeschlagen")
+                print("[Err] Installation fehlgeschlagen")
                 log_error("diagramm", "Erstinstallation fehlgeschlagen.")
                 return False
         
@@ -716,7 +716,7 @@ class DiagramInstaller:
         # 3) Features konfigurieren
         if auto_config and 'enable_heatpump' in auto_config:
             self.enable_heatpump = auto_config['enable_heatpump']
-            print(f"\n✓ Wärmepumpe: {self.enable_heatpump} (Auto-Config)")
+            print(f"\n[OK] Wärmepumpe: {self.enable_heatpump} (Auto-Config)")
             diagramm_logger.info(f"Diagramm-Features: Wärmepumpe={self.enable_heatpump} (Auto)")
         else:
             self.select_diagram_features()
@@ -724,7 +724,7 @@ class DiagramInstaller:
         # 4) Diagramm-Modus
         if auto_config and 'diagram_mode' in auto_config:
             self.diagram_mode = auto_config['diagram_mode']
-            print(f"\n✓ Modus: {self.diagram_mode.upper()} (Auto-Config)")
+            print(f"\n[OK] Modus: {self.diagram_mode.upper()} (Auto-Config)")
             diagramm_logger.info(f"Diagramm-Modus: {self.diagram_mode} (Auto)")
         else:
             self.select_diagram_mode()
@@ -746,12 +746,12 @@ class DiagramInstaller:
         print("\n" + "=" * 60)
         print("INSTALLATION ABGESCHLOSSEN")
         print("=" * 60)
-        print(f"➤ Web-Dateien: {WWW_PATH}")
-        print(f"➤ tmp-Ordner: {TMP_PATH}")
+        print(f"> Web-Dateien: {WWW_PATH}")
+        print(f"> tmp-Ordner: {TMP_PATH}")
         if self.diagram_mode in ("auto", "hybrid"):
-            print(f"➤ Auto-Update: Alle {self.auto_interval} Minuten")
-        print(f"➤ History-Backup: Täglich um Mitternacht")
-        print(f"➤ Config: {self.config_file}")
+            print(f"> Auto-Update: Alle {self.auto_interval} Minuten")
+        print(f"> History-Backup: Täglich um Mitternacht")
+        print(f"> Config: {self.config_file}")
         
         # Service Status anzeigen
         try:
@@ -761,19 +761,19 @@ class DiagramInstaller:
             enabled = res_enabled.stdout.strip()
             
             if enabled == "disabled":
-                print(f"➤ Service Status: {status} (Autostart: disabled)")
-                if input("   ⚠️  Soll der Autostart aktiviert werden? (j/n): ").strip().lower() == 'j':
+                print(f"> Service Status: {status} (Autostart: disabled)")
+                if input("   [!]️  Soll der Autostart aktiviert werden? (j/n): ").strip().lower() == 'j':
                     try:
                         subprocess.run(["sudo", "systemctl", "enable", "e3dc"], check=True, capture_output=True)
-                        print("   ✓ Autostart aktiviert.")
+                        print("   [OK] Autostart aktiviert.")
                     except Exception as e:
-                        print(f"   ❌ Fehler: {e}")
+                        print(f"   [Err] Fehler: {e}")
             else:
-                print(f"➤ Service Status: {status} (Autostart: {enabled})")
+                print(f"> Service Status: {status} (Autostart: {enabled})")
         except Exception:
             pass
 
-        print("\n💡 Tipps:")
+        print("\n[Tipp] Tipps:")
         print(f"  • Web-Interface: http://{host}/index.php")
         print(f"  • Diagramm direkt: http://{host}/diagramm.php")
         print(f"  • History-Backup prüfen: crontab -l")

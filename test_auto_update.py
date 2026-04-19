@@ -25,7 +25,7 @@ if INSTALLER_DIR not in sys.path:
 
 def create_test_release_zip(version, temp_dir):
     """Erstellt eine Test-ZIP-Datei mit der angegebenen Version."""
-    print(f"→ Erstelle Test-ZIP für Version {version}…")
+    print(f"-> Erstelle Test-ZIP für Version {version}…")
     
     zip_path = os.path.join(temp_dir, f"Install-{version}.zip")
     
@@ -37,7 +37,7 @@ def create_test_release_zip(version, temp_dir):
         zf.writestr('Install-E3DC-Control/Install/Installer/__init__.py', '')
         zf.writestr('Install-E3DC-Control/Install/Installer/self_update.py', '# self_update')
     
-    print(f"✓ Test-ZIP erstellt: {zip_path}")
+    print(f"[OK] Test-ZIP erstellt: {zip_path}")
     return zip_path
 
 
@@ -67,7 +67,7 @@ def test_version_comparison():
     from Installer.self_update import get_installed_version
     
     current = get_installed_version()
-    print(f"✓ Installierte Version erkannt: {current}")
+    print(f"[OK] Installierte Version erkannt: {current}")
     
     return True
 
@@ -85,23 +85,23 @@ def test_mock_api_call():
         assert hasattr(self_update, 'get_latest_release_info'), "Funktion nicht gefunden"
         assert callable(self_update.get_latest_release_info), "Nicht callable"
         
-        print(f"✓ Funktion get_latest_release_info() existiert")
+        print(f"[OK] Funktion get_latest_release_info() existiert")
         print(f"  Repo: {self_update.GITHUB_REPO}")
         print(f"  API: {self_update.RELEASES_API}")
         
         # Prüfe Funktion für Version-Vergleich
         assert hasattr(self_update, 'check_and_update'), "check_and_update nicht gefunden"
-        print(f"✓ Funktion check_and_update() existiert")
+        print(f"[OK] Funktion check_and_update() existiert")
         
         # Prüfe Download-Funktion
         assert hasattr(self_update, 'download_release'), "download_release nicht gefunden"
-        print(f"✓ Funktion download_release() existiert")
+        print(f"[OK] Funktion download_release() existiert")
         
-        print("\n✓ Alle API-Funktionen vorhanden und callable")
+        print("\n[OK] Alle API-Funktionen vorhanden und callable")
         return True
     
     except Exception as e:
-        print(f"✗ Fehler: {e}")
+        print(f"[Err] Fehler: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -120,10 +120,10 @@ def test_download_simulation():
     
     # Test: Datei existiert
     if not os.path.exists(test_zip):
-        print(f"✗ Test-ZIP nicht gefunden: {test_zip}")
+        print(f"[Err] Test-ZIP nicht gefunden: {test_zip}")
         return False
     
-    print(f"✓ Test-ZIP heruntergeladen: {test_zip}")
+    print(f"[OK] Test-ZIP heruntergeladen: {test_zip}")
     
     # Test: Entpacken
     try:
@@ -137,7 +137,7 @@ def test_download_simulation():
         # Prüfe Struktur
         install_path = os.path.join(extract_dir, "Install-E3DC-Control", "Install")
         if os.path.exists(install_path):
-            print(f"✓ ZIP entpackt mit korrekter Struktur")
+            print(f"[OK] ZIP entpackt mit korrekter Struktur")
             print(f"  Pfad: {install_path}")
             
             # Cleanup
@@ -145,11 +145,11 @@ def test_download_simulation():
             shutil.rmtree(extract_dir, ignore_errors=True)
             return True
         else:
-            print("✗ Falsche ZIP-Struktur")
+            print("[Err] Falsche ZIP-Struktur")
             return False
     
     except Exception as e:
-        print(f"✗ Fehler beim Entpacken: {e}")
+        print(f"[Err] Fehler beim Entpacken: {e}")
         return False
 
 
@@ -164,13 +164,13 @@ def test_full_workflow():
     temp_dir = tempfile.gettempdir()
     test_zip = create_test_release_zip("2.0.0", temp_dir)
     
-    print("→ Simuliere Auto-Update-Prüfung…")
+    print("-> Simuliere Auto-Update-Prüfung…")
     print(f"  Neueste Version: 2.0.0")
     print(f"  Installierte Version: {self_update.get_installed_version()}")
     
-    print("\n→ Version unterschiedlich → Update erforderlich")
-    print("→ Würde Release herunterladen und installieren")
-    print("→ Würde Installer neu starten")
+    print("\n-> Version unterschiedlich -> Update erforderlich")
+    print("-> Würde Release herunterladen und installieren")
+    print("-> Würde Installer neu starten")
     
     # Cleanup
     try:
@@ -201,7 +201,7 @@ def run_all_tests():
         try:
             results[name] = test_func()
         except Exception as e:
-            print(f"\n✗ Test fehlgeschlagen: {e}")
+            print(f"\n[Err] Test fehlgeschlagen: {e}")
             import traceback
             traceback.print_exc()
             results[name] = False
@@ -215,16 +215,16 @@ def run_all_tests():
     total = len(results)
     
     for name, result in results.items():
-        status = "✓ PASSED" if result else "✗ FAILED"
+        status = "[OK] PASSED" if result else "[Err] FAILED"
         print(f"{status:10} - {name}")
     
     print(f"\nErgebnis: {passed}/{total} Tests erfolgreich")
     
     if passed == total:
-        print("\n✓ Alle Tests erfolgreich! Die Auto-Update-Funktion ist einsatzbereit.")
+        print("\n[OK] Alle Tests erfolgreich! Die Auto-Update-Funktion ist einsatzbereit.")
         return 0
     else:
-        print("\n⚠ Einige Tests fehlgeschlagen. Überprüfe die Fehlermeldungen oben.")
+        print("\n[!] Einige Tests fehlgeschlagen. Überprüfe die Fehlermeldungen oben.")
         return 1
 
 

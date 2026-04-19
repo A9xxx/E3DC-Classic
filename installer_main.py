@@ -34,8 +34,8 @@ if not sys.stdout.isatty():
         sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
 
 # Debug-Ausgabe ganz am Anfang (für Web-Update Diagnose)
-print(f"→ Installer-Skript gestartet (PID: {os.getpid()})")
-print(f"→ Arbeitsverzeichnis: {os.getcwd()}")
+print(f"-> Installer-Skript gestartet (PID: {os.getpid()})")
+print(f"-> Arbeitsverzeichnis: {os.getcwd()}")
 sys.stdout.flush()
 
 # ZUSATZ-DIAGNOSE: Schreibe in eine separate Datei, um Redirect-Probleme auszuschließen
@@ -67,14 +67,14 @@ except ImportError as e:
 def check_python_version():
     """Prüft ob Python 3.7+ vorhanden ist."""
     if sys.version_info < (3, 7):
-        print("✗ Fehler: Python 3.7+ erforderlich!")
+        print("[Err] Fehler: Python 3.7+ erforderlich!")
         print(f" Deine Version: {sys.version}")
         sys.exit(1)
 
 def check_root_privileges():
     """Prüft ob Skript mit root-Rechten läuft."""
     if os.geteuid() != 0:
-        print("✗ Fehler: Dieses Skript muss mit sudo ausgeführt werden!")
+        print("[Err] Fehler: Dieses Skript muss mit sudo ausgeführt werden!")
         print("Beispiel: sudo python3 installer_main.py")
         sys.exit(1)
 
@@ -91,7 +91,7 @@ def ensure_install_user():
             home_dir = user_info.pw_dir
             
             # Benutzer ist valide, also verwenden
-            print(f"→ Aktueller Installationsbenutzer: {saved_user} ({home_dir})")
+            print(f"-> Aktueller Installationsbenutzer: {saved_user} ({home_dir})")
             logger.info(f"Aktueller Installationsbenutzer: {saved_user} ({home_dir})")
             
             # Sicherstellen, dass die Konfiguration vollständig ist und speichern
@@ -107,7 +107,7 @@ def ensure_install_user():
             return True
         except KeyError:
             # Gespeicherter Benutzer ist ungültig, also neu fragen
-            print(f"⚠ Gespeicherter Benutzer '{saved_user}' ist ungültig. Bitte neu konfigurieren.")
+            print(f"[!] Gespeicherter Benutzer '{saved_user}' ist ungültig. Bitte neu konfigurieren.")
             logger.warning(f"Gespeicherter Benutzer '{saved_user}' ist ungültig.")
             # Fall through to ask for a new user
 
@@ -127,7 +127,7 @@ def ensure_install_user():
         user_info = pwd.getpwnam(install_user)
         home_dir = user_info.pw_dir
     except KeyError:
-        print(f"✗ Benutzer '{install_user}' existiert nicht.")
+        print(f"[Err] Benutzer '{install_user}' existiert nicht.")
         logger.error(f"Installationsbenutzer existiert nicht: {install_user}")
         return False
 
@@ -141,10 +141,10 @@ def ensure_install_user():
 
 def ensure_web_config_safe(user, logger):
     """Hilfsfunktion zum sicheren Setzen der web config."""
-    print("→ Prüfe e3dc_paths.json (Aktualisierung nur bei Bedarf)")
+    print("-> Prüfe e3dc_paths.json (Aktualisierung nur bei Bedarf)")
     logger.info("Prüfe e3dc_paths.json (Aktualisierung nur bei Bedarf)")
     if not ensure_web_config(user):
-        print("⚠ Konnte e3dc_paths.json nicht prüfen/aktualisieren.")
+        print("[!] Konnte e3dc_paths.json nicht prüfen/aktualisieren.")
         logger.warning("Konnte e3dc_paths.json nicht prüfen/aktualisieren (user=%s)", user)
 
 def verify_config_file_access(install_user):
@@ -185,7 +185,7 @@ def check_for_updates():
         signature = inspect.signature(check_and_update)
         params = signature.parameters
 
-        print("\n→ Prüfe auf Updates...")
+        print("\n-> Prüfe auf Updates...")
         
         # Sicherstellen, dass wir nur Parameter übergeben, die die Funktion auch kennt
         check_kwargs = {}
@@ -206,7 +206,7 @@ def check_for_updates():
         update_available = bool(update_result)
         
         if not update_available:
-            print("✓ Du bist auf dem neuesten Stand.\n")
+            print("[OK] Du bist auf dem neuesten Stand.\n")
             return
 
         # NEU: Unattended Mode installiert Updates automatisch
@@ -214,10 +214,10 @@ def check_for_updates():
             install_choice = "j"
             print("Automatischer Modus: Update wird installiert.")
         else:
-            install_choice = input("✓ Update verfügbar. Jetzt installieren? (j/n): ").strip().lower()
+            install_choice = input("[OK] Update verfügbar. Jetzt installieren? (j/n): ").strip().lower()
             
         if install_choice != "j":
-            print("→ Update übersprungen.\n")
+            print("-> Update übersprungen.\n")
             return
 
         install_kwargs = {}
@@ -231,17 +231,17 @@ def check_for_updates():
             restart_installer()
             return
         else:
-            print("✗ Update-Installation fehlgeschlagen. Bitte Log-Datei prüfen.\n")
+            print("[Err] Update-Installation fehlgeschlagen. Bitte Log-Datei prüfen.\n")
             return
 
     except ImportError:
         pass
     except Exception as e:
-        print(f"⚠ Warnung: Update-Prüfung fehlgeschlagen: {e}\n")
+        print(f"[!] Warnung: Update-Prüfung fehlgeschlagen: {e}\n")
 
 def restart_installer():
     """Startet den Installer neu."""
-    print("\n→ Starte Installer neu…\n")
+    print("\n-> Starte Installer neu…\n")
     # Argumente durchreichen, falls Unattended Mode aktiv ist
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
@@ -261,7 +261,7 @@ def check_duplicate_installations():
         # Nur warnen, wenn wir NICHT im Standardpfad sind, aber einer existiert
         if os.path.exists(standard_path) and current_path != standard_path:
             print("\n" + "!" * 60)
-            print("⚠ HINWEIS: Parallele Installation gefunden!")
+            print("[!] HINWEIS: Parallele Installation gefunden!")
             print(f"  Laufend:   {current_path}")
             print(f"  Gefunden:  {standard_path}")
             print("!" * 60)
@@ -287,26 +287,26 @@ def main():
     try:
         # Führe den BOM-Fixer aus, um Dateikodierungsprobleme zu beheben
         if fix_bom_main:
-            print("→ Prüfe Dateikodierungen (BOM)...")
+            print("-> Prüfe Dateikodierungen (BOM)...")
             sys.stdout.flush()
             fix_bom_main()
-            print("✓ BOM-Prüfung abgeschlossen.")
+            print("[OK] BOM-Prüfung abgeschlossen.")
             sys.stdout.flush()
         else:
-            print("⚠ Warnung: BOM-Fixer-Skript (fix_bom.py) nicht gefunden.")
+            print("[!] Warnung: BOM-Fixer-Skript (fix_bom.py) nicht gefunden.")
             sys.stdout.flush()
 
         setup_logging()
         check_python_version()
         check_root_privileges()
         
-        print(f"→ Installer-Pfad: {SCRIPT_DIR}")
-        print(f"→ Konfiguration:  {CONFIG_FILE}")
+        print(f"-> Installer-Pfad: {SCRIPT_DIR}")
+        print(f"-> Konfiguration:  {CONFIG_FILE}")
         sys.stdout.flush()
 
         # Direktes Update wenn angefordert
         if args.update_e3dc:
-            print("→ Starte Update-Modul...")
+            print("-> Starte Update-Modul...")
             sys.stdout.flush()
             from Installer.update import update_e3dc
             update_e3dc(headless=True)
@@ -337,7 +337,7 @@ def main():
         YELLOW = '\033[93m'
         RESET = '\033[0m'
         if venv_name and venv_path:
-            print(f"{GREEN}✓ Python venv aktiv: {venv_path}{RESET}")
+            print(f"{GREEN}[OK] Python venv aktiv: {venv_path}{RESET}")
             # Update e3dc_paths.json für PHP
             try:
                 paths_file = "/var/www/html/e3dc_paths.json"
@@ -359,31 +359,31 @@ def main():
                         os.chmod(paths_file, 0o664)
                     except: pass
             except Exception as e:
-                print(f"⚠ Fehler beim Aktualisieren von e3dc_paths.json: {e}")
+                print(f"[!] Fehler beim Aktualisieren von e3dc_paths.json: {e}")
         else:
-            print(f"{YELLOW}ℹ️  Kein Python venv gefunden (System-Python wird genutzt){RESET}")
+            print(f"{YELLOW}[i]  Kein Python venv gefunden (System-Python wird genutzt){RESET}")
 
         # Wenn im Unattended Mode, beenden wir das Script nach den Grund-Checks und Updates
         # Da das interaktive Menü in der Konsole hier keinen Sinn macht
         if UNATTENDED_MODE:
-            print("✓ Automatischer Durchlauf abgeschlossen. Beende Installer.")
+            print("[OK] Automatischer Durchlauf abgeschlossen. Beende Installer.")
             sys.exit(0)
 
         # Importiere Core-Modul
         try:
             from Installer.core import run_main_menu
         except ImportError as e:
-            print(f"✗ Fehler beim Laden des Installer-Moduls: {e}")
+            print(f"[Err] Fehler beim Laden des Installer-Moduls: {e}")
             print(f" Prüfe ob das Verzeichnis '{INSTALLER_DIR}' existiert.")
             sys.exit(1)
 
         run_main_menu()
 
     except KeyboardInterrupt:
-        print("\n\n✗ Vorgang abgebrochen.")
+        print("\n\n[Err] Vorgang abgebrochen.")
         sys.exit(1)
     except Exception as e:
-        print(f"\n✗ Unerwarteter Fehler: {e}")
+        print(f"\n[Err] Unerwarteter Fehler: {e}")
         logging.error(f"Unerwarteter Fehler im Installer: {e}", exc_info=True)
         sys.exit(1)
 

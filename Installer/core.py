@@ -76,7 +76,7 @@ def auto_discover_modules():
             full_name = f"{PACKAGE_NAME}.{module_name}"
             importlib.import_module(full_name)
         except Exception as e:
-            print(f"⚠ Warnung: Konnte Modul '{module_name}' nicht laden: {e}")
+            print(f"[!] Warnung: Konnte Modul '{module_name}' nicht laden: {e}")
     
     _modules_loaded = True
 
@@ -153,7 +153,7 @@ def run_main_menu(restart_callback=None):
             choice = input(f"Auswahl ({install_user}): ").strip().lower()
             
             if choice == "q":
-                print("→ Beende Installer.\n")
+                print("-> Beende Installer.\n")
                 break
             elif choice == "a":
                 current_view = "all"
@@ -167,7 +167,7 @@ def run_main_menu(restart_callback=None):
                     current_view = active_categories[idx]
                     continue
             
-            print("✗ Ungültige Auswahl.\n")
+            print("[Err] Ungültige Auswahl.\n")
 
         elif current_view == "search":
             print("\n" + "-" * 40)
@@ -182,7 +182,7 @@ def run_main_menu(restart_callback=None):
             matches = [c for c in commands if term in c.label.lower() or term == c.key.lower()]
             
             if not matches:
-                print("✗ Keine Treffer.\n")
+                print("[Err] Keine Treffer.\n")
                 continue
             
             print(f"\nTreffer für '{term}':")
@@ -198,12 +198,12 @@ def run_main_menu(restart_callback=None):
             if target:
                 safe_menu_action(target.key, target.label, target.func)
                 if restart_callback and target.key in ("2",):
-                    print("→ Neuladen des Menüs…\n")
+                    print("-> Neuladen des Menüs…\n")
                     restart_callback()
                 input("Drücke ENTER um fortzufahren...")
                 current_view = "main"
             else:
-                print("✗ Ungültige Auswahl.\n")
+                print("[Err] Ungültige Auswahl.\n")
 
         else:
             # Untermenü oder Alle
@@ -243,11 +243,11 @@ def run_main_menu(restart_callback=None):
                 
                 # Optional: nach Updates/Rollback neu starten
                 if restart_callback and choice in ("2",):
-                    print("→ Neuladen des Menüs…\n")
+                    print("-> Neuladen des Menüs…\n")
                     restart_callback()
                 
                 # Nach Ausführung im Untermenü bleiben oder zurück?
                 # Bleiben ist meist angenehmer für Folgebefehle.
                 input("Drücke ENTER um fortzufahren...")
             else:
-                print("✗ Ungültige Auswahl.\n")
+                print("[Err] Ungültige Auswahl.\n")

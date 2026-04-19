@@ -79,15 +79,15 @@ IP_ADDR=$(hostname -I | cut -d' ' -f1)
 if [ -z "$1" ]; then
     REASON=$(journalctl -b -1 -t PIGUARD --no-pager | tail -n 1)
     if [ -z "$REASON" ]; then
-        MSG=$(printf "🚀 $DEVICE_NAME gestartet.\\n📍 IP: $IP_ADDR\\nℹ️ Ursache: Manueller Start oder Stromausfall.")
+        MSG=$(printf "🚀 $DEVICE_NAME gestartet.\\n📍 IP: $IP_ADDR\\n[i] Ursache: Manueller Start oder Stromausfall.")
     else
         CLEAN_REASON=$(echo "$REASON" | sed 's/.*PIGUARD: //')
-        MSG=$(printf "⚠️ $DEVICE_NAME REBOOT erfolgt!\\n📍 IP: $IP_ADDR\\n❌ Grund: $CLEAN_REASON")
+        MSG=$(printf "[!]️ $DEVICE_NAME REBOOT erfolgt!\\n📍 IP: $IP_ADDR\\n[Err] Grund: $CLEAN_REASON")
     fi
 elif [ "$1" == "status" ]; then
     UPTIME=$(uptime -p)
     TEMP=$(vcgencmd measure_temp | cut -d'=' -f2)
-    MSG=$(printf "✅ Status: $DEVICE_NAME Online.\\n📍 IP: $IP_ADDR\\n⏱ Laufzeit: $UPTIME\\n🌡 Temp: $TEMP")
+    MSG=$(printf "[OK] Status: $DEVICE_NAME Online.\\n📍 IP: $IP_ADDR\\n⏱ Laufzeit: $UPTIME\\n🌡 Temp: $TEMP")
 else
     MSG=$(printf "%s\\n📍 IP: $IP_ADDR" "$1")
 fi
@@ -141,7 +141,7 @@ while true; do
   if [ "$network_ok" = false ]; then
     ((fb_fail++))
     if [ $fb_fail -eq 5 ] && [ "$warned_fb" = false ]; then
-        /usr/local/bin/boot_notify.sh "⚠️ Netzwerk weg ($ROUTER_IPS)! Reboot in 4 Min."
+        /usr/local/bin/boot_notify.sh "[!]️ Netzwerk weg ($ROUTER_IPS)! Reboot in 4 Min."
         warned_fb=true
     fi
   else
@@ -153,7 +153,7 @@ while true; do
   if ! screen -ls {install_user}/ | grep -v "Dead" | grep -q "E3DC"; then
     ((e3dc_fail++))
     if [ $e3dc_fail -eq 5 ] && [ "$warned_e3dc" = false ]; then
-        /usr/local/bin/boot_notify.sh "⚠️ E3DC Screen fehlt! Restart Service in 2 Min."
+        /usr/local/bin/boot_notify.sh "[!]️ E3DC Screen fehlt! Restart Service in 2 Min."
         warned_e3dc=true
     fi
   else
@@ -195,7 +195,7 @@ while true; do
     if [ $diff -gt 900 ]; then
       ((file_fail++))
       if [ $file_fail -eq 5 ] && [ "$warned_file" = false ]; then
-          /usr/local/bin/boot_notify.sh "⚠️ Datei veraltet! ($ACTUAL_FILE > 15min). Restart Service in 2 Min."
+          /usr/local/bin/boot_notify.sh "[!]️ Datei veraltet! ($ACTUAL_FILE > 15min). Restart Service in 2 Min."
           warned_file=true
       fi
     else
@@ -211,7 +211,7 @@ while true; do
   if [ "$disk_usage" -gt 90 ]; then
     ((disk_fail++))
     if [ $disk_fail -eq 5 ] && [ "$warned_disk" = false ]; then
-        /usr/local/bin/boot_notify.sh "⚠️ Speicherplatz kritisch! SD-Karte zu $disk_usage% voll."
+        /usr/local/bin/boot_notify.sh "[!]️ Speicherplatz kritisch! SD-Karte zu $disk_usage% voll."
         warned_disk=true
     fi
   else
@@ -226,7 +226,7 @@ while true; do
   if [ $e3dc_fail -ge 18 ]; then
     echo "E3DC Screen fehlt seit 3 Min. Restart E3DC Service!" | logger -t PIGUARD
     systemctl restart e3dc
-    /usr/local/bin/boot_notify.sh "⚠️ E3DC Service neu gestartet (Screen fehlte)."
+    /usr/local/bin/boot_notify.sh "[!]️ E3DC Service neu gestartet (Screen fehlte)."
     e3dc_fail=0
     warned_e3dc=false
     sleep 60
@@ -234,7 +234,7 @@ while true; do
   if [ $file_fail -ge 18 ]; then
     echo "Watchdog-Datei $ACTUAL_FILE seit >18 Min nicht aktualisiert. Restart E3DC Service!" | logger -t PIGUARD
     systemctl restart e3dc
-    /usr/local/bin/boot_notify.sh "⚠️ E3DC Service neu gestartet (Datei $ACTUAL_FILE veraltet)."
+    /usr/local/bin/boot_notify.sh "[!]️ E3DC Service neu gestartet (Datei $ACTUAL_FILE veraltet)."
     file_fail=0
     warned_file=false
     sleep 60
@@ -318,17 +318,17 @@ def update_cronjobs(daily_enabled=True, daily_hour=12):
         os.unlink(tmp_path)
         
         if res['success']:
-            print("  ✓ Cronjobs erfolgreich geschrieben")
+            print("  [OK] Cronjobs erfolgreich geschrieben")
         else:
-            print(f"  ✗ Fehler beim Schreiben der Crontab: {res['stderr']}")
+            print(f"  [Err] Fehler beim Schreiben der Crontab: {res['stderr']}")
             
     except Exception as e:
-        print(f"  ✗ Fehler bei Cronjob-Einrichtung: {e}")
+        print(f"  [Err] Fehler bei Cronjob-Einrichtung: {e}")
 
 def setup_watchdog_menu():
     # Prüfen auf Root-Rechte
     if os.geteuid() != 0:
-        print("❌ Fehler: Dieses Skript muss mit 'sudo' ausgeführt werden!")
+        print("[Err] Fehler: Dieses Skript muss mit 'sudo' ausgeführt werden!")
         return
 
     print("\n=== PV-Wächter & Telegram Setup ===")
@@ -338,7 +338,7 @@ def setup_watchdog_menu():
     is_installed = os.path.exists(NOTIFY_PATH)
     
     if is_installed:
-        print(f"✓ Watchdog ist bereits installiert.")
+        print(f"[OK] Watchdog ist bereits installiert.")
         print(f"  Aktueller Name: {current['DEVICE_NAME']}")
         print(f"  Router-IP: {current['ROUTER_IP']}")
         print(f"  Telegram: {'Aktiv' if current['TOKEN'] else 'Inaktiv'}")
@@ -397,7 +397,7 @@ def setup_watchdog_menu():
         
         use_file = input(f"Datei auf Aktualisierung überwachen (Hänger-Schutz)? (j/n) [j]: ").strip().lower()
         if use_file == 'j' or use_file == '':
-            print("   ℹ️  Tipp: Für täglich wechselnde Dateien (z.B. protokoll.Sa.txt) nutze '{day}' als Platzhalter.")
+            print("   [i]  Tipp: Für täglich wechselnde Dateien (z.B. protokoll.Sa.txt) nutze '{day}' als Platzhalter.")
             monitor_file = input(f"Pfad zur Datei [{monitor_file}]: ").strip() or monitor_file
         else:
             monitor_file = ""
@@ -435,7 +435,7 @@ def setup_watchdog_menu():
             if os.path.exists(bf):
                 try:
                     os.remove(bf)
-                    print(f"✓ Alte Fehler-Datei entfernt: {bf}")
+                    print(f"[OK] Alte Fehler-Datei entfernt: {bf}")
                 except: pass
 
         print("\n--- INSTALLATION ABGESCHLOSSEN ---")
@@ -445,7 +445,7 @@ def setup_watchdog_menu():
         new_name = input(f"Neuer Gerätename [{current['DEVICE_NAME']}]: ").strip()
         if new_name:
             create_boot_notify(current['TOKEN'], current['CHAT_ID'], new_name)
-            print("✓ Name geändert.")
+            print("[OK] Name geändert.")
             
     elif choice == "3": # Daily Config
         use_daily = input("Täglichen Statusbericht aktivieren? (j/n): ").strip().lower()
@@ -467,14 +467,14 @@ def setup_watchdog_menu():
             chat_id = input(f"Chat-ID [{current['CHAT_ID']}]: ").strip() or current['CHAT_ID']
         
         create_boot_notify(token, chat_id, current['DEVICE_NAME'])
-        print("✓ Telegram-Einstellungen aktualisiert.")
+        print("[OK] Telegram-Einstellungen aktualisiert.")
         
     elif choice == "5": # Router IP
         new_ip = input(f"Neue Router-IP(s) [{current['ROUTER_IP']}]: ").strip()
         if new_ip:
             create_pi_guard(new_ip, current['MONITOR_FILE'])
             subprocess.run(["sudo", "systemctl", "restart", "piguard.service"])
-            print("✓ Router-IP aktualisiert und Service neugestartet.")
+            print("[OK] Router-IP aktualisiert und Service neugestartet.")
 
 def install_watchdog_silent():
     """Installiert den Watchdog automatisch mit sicheren Defaults (ohne Telegram)."""
@@ -527,7 +527,7 @@ def install_watchdog_silent():
     subprocess.run("sudo systemctl restart apache2 2>/dev/null || sudo systemctl restart lighttpd 2>/dev/null", shell=True)
     subprocess.run(["sudo", "systemctl", "restart", "piguard.service"])
     
-    print("✓ Watchdog erfolgreich installiert.")
+    print("[OK] Watchdog erfolgreich installiert.")
 
 if __name__ == "__main__":
     setup_watchdog_menu()

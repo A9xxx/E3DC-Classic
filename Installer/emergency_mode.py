@@ -41,7 +41,7 @@ def run_emergency_mode():
             use_venv = False
         install_system_packages(use_venv=use_venv)
     except Exception as e:
-        print(f"❌ Fehler in Schritt 1: {e}")
+        print(f"[Err] Fehler in Schritt 1: {e}")
         logger.error(f"Fehler in Schritt 1 (Systempakete): {e}")
 
     # 2. Rechte
@@ -53,7 +53,7 @@ def run_emergency_mode():
         # Wir rufen den Wizard auf. Der User muss ggf. mit 'j' bestätigen.
         run_permissions_wizard()
     except Exception as e:
-        print(f"❌ Fehler in Schritt 2: {e}")
+        print(f"[Err] Fehler in Schritt 2: {e}")
         logger.error(f"Fehler in Schritt 2 (Permissions): {e}")
 
     # 3. Service
@@ -67,7 +67,7 @@ def run_emergency_mode():
         # Versuchen zu starten
         start_e3dc_control()
     except Exception as e:
-        print(f"❌ Fehler in Schritt 3: {e}")
+        print(f"[Err] Fehler in Schritt 3: {e}")
         logger.error(f"Fehler in Schritt 3 (Service): {e}")
 
     # 4. Watchdog
@@ -84,7 +84,7 @@ def run_emergency_mode():
         print("Rufe Watchdog-Menü auf...")
         setup_watchdog_menu()
     except Exception as e:
-        print(f"❌ Fehler in Schritt 4: {e}")
+        print(f"[Err] Fehler in Schritt 4: {e}")
         logger.error(f"Fehler in Schritt 4 (Watchdog): {e}")
 
     print("\n" + "=" * 60)
