@@ -73,20 +73,22 @@ def copy_existing_config():
         return False
 
 
-def create_e3dc_config():
+def create_e3dc_config(skip_copy_prompt=False):
     """Kompletter Config-Wizard mit allen Parametern und Defaults."""
     print("\n=== E3DC-Konfiguration erstellen ===\n")
     config_logger.info("Starte Konfigurations-Wizard.")
     
     # Prüfen ob vorhandene Config kopiert werden soll
-    copy_existing = ask("Möchtest du eine vorhandene e3dc.config.txt kopieren? (j/n)", "n")
-    
-    if copy_existing and copy_existing.lower() == "j":
-        if copy_existing_config():
-            return  # Erfolgreich kopiert, Wizard beenden
-        else:
-            print("\nFortfahren mit manuellem Wizard...\n")
-            config_logger.warning("Kopieren der Konfiguration fehlgeschlagen, fahre mit manuellem Wizard fort.")
+    if not skip_copy_prompt:
+        copy_existing = ask("Möchtest du eine vorhandene e3dc.config.txt kopieren? (j/n)", "n")
+        
+        if copy_existing and copy_existing.lower() == "j":
+            if copy_existing_config():
+                return  # Erfolgreich kopiert, Wizard beenden
+            else:
+                print("\nFortfahren mit manuellem Wizard...\n")
+                config_logger.warning("Kopieren der Konfiguration fehlgeschlagen, fahre mit manuellem Wizard fort.")
+
     
     cfg = {}
 

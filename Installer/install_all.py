@@ -254,7 +254,7 @@ def install_all_main():
                 print(f"✗ Fehler beim Kopieren: {e}")
                 create_e3dc_config() # Fallback
         else:
-            create_e3dc_config()
+            create_e3dc_config(skip_copy_prompt=True)
             
         # Erstelle auch leere wallbox.txt wenn noch nicht vorhanden
         wallbox_file = os.path.join(INSTALL_PATH, "e3dc.wallbox.txt")
