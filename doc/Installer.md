@@ -48,7 +48,7 @@ Da das Programm in Hintergrund-Sessions (`screen`) läuft, sind diese Befehle f�
 *   **/home/pi/.venv_e3dc/**: Die isolierte Python-Umgebung (Virtual Environment).
 *   **/var/www/html/**: Das Webverzeichnis.
     *   `ramdisk/live.txt`: Der aktuelle Status (wird alle 4 Sek. überschrieben).
-    *   `diagramm.html`: Das große Desktop-Diagramm.
+    *   `diagramm.php`: Das große Desktop-Diagramm.
     *   `index.php`: Die Hauptseite des Dashboards.
 *   **/home/pi/Install/logs/install.log**: Deine Fehlerdiagnose-Zentrale.
 

@@ -1,5 +1,15 @@
 # Changelog
  
+## [2.6.9 Classic] - Webserver & System-Stabilisierung
+ 
+### 🌐 Webserver & PHP-Integration
+*   **Apache2 & PHP-Fix:** Das PHP-Apache-Modul (`libapache2-mod-php`) wird nun vom Installer explizit mitinstalliert. Dies löst Probleme auf modernen Systemen (wie Debian 12 Bookworm), bei denen PHP-Dateien sonst nur zum Download angeboten wurden, anstatt ausgeführt zu werden.
+*   **Lighttpd Konfliktlösung:** Der Installer erkennt nun automatisch, falls der konkurrierende Webserver `lighttpd` (oft durch Pi-hole installiert) läuft, und deaktiviert diesen. Dadurch wird sichergestellt, dass Apache fehlerfrei auf Port 80 starten kann.
+*   **Aktivierung:** Das PHP-Modul wird nun via `a2enmod php*` zwingend für Apache aktiviert und der Webserver anschließend sauber neu gestartet.
+ 
+### 📘 Dokumentation & Installer-Tipps
+*   **Korrektur Diagramm-Links:** Letzte falsche Verweise auf die nicht mehr existenten Dateien `diagramm.html` und `live_diagramm.html` (Legacy-Plotly) wurden entfernt. Dokumentation und Installer-Tipps verweisen nun korrekt auf die modernen serverseitigen PHP-Pendants `diagramm.php` und `live_diagramm.php`.
+
 ## [2.6.8 Classic] - Security & Structural Finalization
  
 ### 🛡️ Datensicherheit & Self-Update

@@ -775,7 +775,7 @@ class DiagramInstaller:
 
         print("\n💡 Tipps:")
         print(f"  • Web-Interface: http://{host}/index.php")
-        print(f"  • Diagramm direkt: http://{host}/diagramm.html")
+        print(f"  • Diagramm direkt: http://{host}/diagramm.php")
         print(f"  • History-Backup prüfen: crontab -l")
         print("=" * 60 + "\n")
 

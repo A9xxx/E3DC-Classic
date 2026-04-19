@@ -114,7 +114,7 @@ def install_system_packages(use_venv=True):
 
     packages = [
         "curl", "jq", "python3-bs4", "git", "screen",
-        "apache2", "php", "python3", "python3-pip", "python3-venv",
+        "apache2", "libapache2-mod-php", "php", "python3", "python3-pip", "python3-venv",
         "libjpeg-dev", "zlib1g-dev",
         "libcurl4-openssl-dev", "libssl-dev",
         "libmosquitto-dev", "libjsoncpp-dev",
@@ -125,6 +125,15 @@ def install_system_packages(use_venv=True):
     system_logger.info(f"Installiere {len(packages)} Systempakete.")
     for pkg in packages:
         apt_install(pkg)
+
+    # Veraltete lighttpd-Installation entfernen oder deaktivieren, um Port-Konflikte mit Apache2 zu vermeiden
+    print("→ Prüfe auf Konflikte mit lighttpd…")
+    run_command("sudo systemctl stop lighttpd", timeout=10)
+    run_command("sudo systemctl disable lighttpd", timeout=10)
+    
+    # PHP-Modul für Apache aktivieren und neu starten
+    run_command("sudo a2enmod php*", timeout=10)
+    run_command("sudo systemctl restart apache2", timeout=10)
 
     # Python Umgebung einrichten
     if use_venv:

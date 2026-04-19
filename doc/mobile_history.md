@@ -29,7 +29,7 @@ Die Datei `mobile_history.php` bietet eine spezialisierte Ansicht für den zeitl
     *   `run_live_history.php`: Der AJAX-Handler, der die Parameter (`hours`, `file`) validiert und das Python-Skript startet.
     *   `plot_live_history.py`: Das Python-Skript, welches die Plotly-Grafik als HTML-Datei generiert.
 *   **Ausgabe:**
-    *   `live_diagramm.html`: Die vom Python-Skript erzeugte HTML-Datei, die im Iframe angezeigt wird.
+    *   `live_diagramm.php`: Die serverseitig erzeugte PHP-Datei (welche das alte Python-HTML abgelöst hat), die im Iframe angezeigt wird.
 
 ### Ablauf eines Diagramm-Updates
 1.  **Trigger:** Benutzer wählt einen Zeitraum oder eine Archiv-Datei.
