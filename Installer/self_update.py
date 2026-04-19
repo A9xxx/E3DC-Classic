@@ -11,7 +11,7 @@ import subprocess
 import tempfile
 import shutil
 from urllib.request import urlopen, Request
-from urllib.error import URLError
+from urllib.error import URLError, HTTPError
 import re
 
 from .core import register_command
@@ -94,7 +94,12 @@ def get_latest_release_info():
                     })
             
             return release_info if release_info['download_url'] else None
-    
+    except HTTPError as e:
+        if e.code == 404:
+            # 404 ist bei neuen Repositories ohne Releases normal
+            return None
+        print(f"⚠ HTTP-Fehler beim Abrufen der Release-Informationen: {e}")
+        log_warning("self_update", f"HTTP-Fehler beim Abrufen der Release-Informationen: {e}")
     except URLError as e:
         print(f"⚠ Netzwerkfehler beim Abrufen der Release-Informationen: {e}")
         log_warning("self_update", f"Netzwerkfehler beim Abrufen der Release-Informationen: {e}")
@@ -213,27 +218,27 @@ def extract_release(zip_path, new_version):
         else:
             print(f"  ⚠ Kein bestehendes Installationsverzeichnis für Backup gefunden: {INSTALLER_DIR}")
 
-        # Ersetze Installer-Verzeichnis (Inhalt, nicht das Verzeichnis selbst)
+        # Ersetze Installer-Verzeichnis (Inhalt)
         try:
-            # Lösche nur den Inhalt, nicht das Verzeichnis selbst (Shell-Kompatibilität)
-            if os.path.exists(INSTALLER_DIR):
-                for item in os.listdir(INSTALLER_DIR):
-                    item_path = os.path.join(INSTALLER_DIR, item)
-                    if os.path.isdir(item_path):
-                        shutil.rmtree(item_path)
-                    else:
-                        os.remove(item_path)
-            else:
+            if not os.path.exists(INSTALLER_DIR):
                 os.makedirs(INSTALLER_DIR)
             
             # Kopiere neuen Inhalt ins bestehende Verzeichnis
+            # Wir löschen NICHTS vorher, um versehentliches Löschen von config-Dateien zu vermeiden
             for item in os.listdir(src_installer):
-                src_path = os.path.join(src_installer, item)
-                dst_path = os.path.join(INSTALLER_DIR, item)
-                if os.path.isdir(src_path):
-                    shutil.copytree(src_path, dst_path)
+                s = os.path.join(src_installer, item)
+                d = os.path.join(INSTALLER_DIR, item)
+                
+                # Überspringe .git
+                if item == ".git":
+                    continue
+                    
+                if os.path.isdir(s):
+                    # dirs_exist_ok=True sorgt dafür, dass Unterordner zusammengeführt werden
+                    shutil.copytree(s, d, dirs_exist_ok=True)
                 else:
-                    shutil.copy2(src_path, dst_path)
+                    # Normale Dateien werden überschrieben
+                    shutil.copy2(s, d)
             
             print("✓ Update erfolgreich installiert")
             update_logger.info("Dateien erfolgreich aktualisiert.")

@@ -547,6 +547,10 @@ def fix_file_permissions(issues):
         file_name = os.path.basename(path)
         # Fehlende Dateien anlegen
         if file_issues.get("missing"):
+            # Spezielle Prüfung: Webportal-Dateien NICHT leer anlegen (macht UI kaputt)
+            if path.startswith("/var/www/html") and not path.endswith(".txt") and not path.endswith(".json"):
+                perm_logger.info(f"Überspringe Anlegen von fehlender Webportal-Datei: {path}")
+                continue
             print(f"  â†’ Erstelle fehlende Datei: {path}")
             # `touch` erstellt eine leere Datei, die danach weiter bearbeitet wird
             result = run_command(f"sudo touch {path}")

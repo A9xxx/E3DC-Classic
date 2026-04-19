@@ -49,7 +49,6 @@ CONFIG_FILE = os.path.join(INSTALL_PATH, "diagram_config.json")
 CRON_COMMENT = "E3DC-Control Diagram Auto-Update"
 BACKUP_CRON_COMMENT = "E3DC-Control History Backup" # Neuer Kommentar für den Backup-Cron
 BACKUP_SCRIPT_PATH = "/var/www/html/backup_history.php" # Pfad zum Backup-Skript
-ZIP_NAME = "E3DC-Control.zip"
 OLD_MODULE_DIRS = ["config", "parsing", "plotting"]
 OBSOLETE_WEB_FILES = [
     "auto.php", "check.php", "config.php", "test.php", "mobile_history.php", "mobile_archiv.php",
@@ -69,7 +68,6 @@ class DiagramInstaller:
         self.diagram_mode = "manual"  # auto oder manual
         self.auto_interval = 5  # Minuten
         self.enable_heatpump = True
-        self.plot_script_path = os.path.join(self.install_path, PLOT_SCRIPT_NAME)
         self.install_user = get_install_user()
         self.install_uid, _ = get_user_ids()
         self.www_data_gid = get_www_data_gid()
@@ -114,12 +112,10 @@ class DiagramInstaller:
 
     
     def check_script_installed(self):
-        """
-        Prüft, ob plot_soc_changes.py bereits installiert ist.
-        """
-        return os.path.isfile(self.plot_script_path)
-    
-    def extract_and_install_from_zip(self):
+        """Prüft ob das Web-Portal bereits installiert ist."""
+        return os.path.exists(os.path.join(WWW_PATH, "css"))
+
+    def install_webportal_from_repo(self):
         """
         Kopiert Diagramm-System-Dateien aus lokalen Ordnern.
         - PHP/HTML Web-Portal-Dateien → /var/www/html/
@@ -127,22 +123,19 @@ class DiagramInstaller:
         - Setzt Rechte für www-data
         """
         print("\n" + "-" * 60)
-        print("Installiere Diagramm-System...")
+        print("Installiere Web-Portal...")
         print("-" * 60)
         
         script_dir = os.path.dirname(os.path.abspath(__file__))
         base_dir = os.path.dirname(script_dir)
         try:
-                # Diagram scripts were removed in E3DC-Classic
-                # Plotly runs via JS in browser now
-                
-                # 2) Web-Portal Dateien rekursiv nach /var/www/html/ kopieren
-                print("\n→ Installiere Web-Portal-Dateien (PHP, CSS, JS, Icons)...")
+                # Web-Portal Dateien rekursiv nach /var/www/html/ kopieren
+                print("\n→ Kopiere Web-Portal-Dateien (PHP, CSS, JS, Icons)...")
                 html_source = os.path.join(base_dir, "html")
                 
                 if not os.path.isdir(html_source):
-                    log_warning("diagramm", "Kein 'html'-Ordner in ZIP gefunden.")
-                    print(f"⚠️  Kein 'html'-Ordner in ZIP gefunden")
+                    log_warning("diagramm", f"Kein 'html'-Ordner unter {base_dir} gefunden.")
+                    print(f"⚠️  Kein 'html'-Ordner im Repository gefunden ({html_source})")
                 else:
                     # Sicherung der e3dc_paths.json
                     paths_config_to_preserve = None
@@ -668,54 +661,48 @@ class DiagramInstaller:
             return False
         
         # 1) Skript-Status prüfen
+        # Im Classic-Modus prüfen wir auf vorhandene Webportal-Dateien
         script_exists = self.check_script_installed()
         
         if script_exists:
-            print(f"\n✓ {PLOT_SCRIPT_NAME} ist bereits installiert")
-            print(f"  Pfad: {self.plot_script_path}")
-            
             # Frage: Neu-Installation oder nur Konfiguration
-            print("\nWas möchtest du tun?")
-            print("1 = Nur Konfiguration ändern (Dateien bleiben)")
-            print("2 = Komplett neu installieren (aus ZIP)")
-            print("3 = Crontab & Service aktualisieren")
+            print("\nBereits installiertes Webportal gefunden.")
+            print("Was möchtest du tun?")
+            print("1 = Nur Konfiguration ändern")
+            print("2 = Komplett neu installieren")
+            print("3 = Crontab aktualisieren")
             print("q = Abbrechen")
-            choice = input("Auswahl (1-4): ").strip()
+            choice = input("Auswahl (1-3): ").strip()
             
             if choice == "q":
                 print("Installation abgebrochen")
                 diagramm_logger.info("Installation vom Benutzer abgebrochen.")
                 return False
             elif choice == "2":
-                if not self.extract_and_install_from_zip():
+                if not self.install_webportal_from_repo():
                     print("❌ Installation fehlgeschlagen")
-                    log_error("diagramm", "Neuinstallation aus ZIP fehlgeschlagen.")
+                    log_error("diagramm", "Neuinstallation fehlgeschlagen.")
                     return False
             elif choice == "3":
-                self.select_diagram_mode()
                 self.setup_crontab()
-                self.ensure_update_check_config()
                 install_e3dc_service()
                 self.configure_web_sudoers()
-                self.save_config()
                 self.print_summary()
                 return True
             # Bei choice == "1" wird nur Konfiguration gemacht (unten)
         
         else:
-            # Skript fehlt - erste Installation
-            # Direkt fragen, ob aus ZIP installiert werden soll
-            choice = input("\nDiagramm-System aus ZIP-Datei installieren? (j/n): ").strip().lower()
+            # Erste Installation
+            choice = input("\nWeb-Portal (Diagramm-System) jetzt installieren? (j/n): ").strip().lower()
             
             if choice != 'j':
                 print("Installation übersprungen")
-                diagramm_logger.info("Installation aus ZIP übersprungen.")
+                diagramm_logger.info("Installation übersprungen.")
                 return False
             
-            # Aus ZIP installieren
-            if not self.extract_and_install_from_zip():
+            if not self.install_webportal_from_repo():
                 print("❌ Installation fehlgeschlagen")
-                log_error("diagramm", "Erstinstallation aus ZIP fehlgeschlagen.")
+                log_error("diagramm", "Erstinstallation fehlgeschlagen.")
                 return False
         
         # Gemeinsame Einrichtung für Option 1, 2 und Erstinstallation

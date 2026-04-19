@@ -1,4 +1,23 @@
 # Changelog
+ 
+## [2.6.8 Classic] - Security & Structural Finalization
+ 
+### 🛡️ Datensicherheit & Self-Update
+*   **Schutz vor Datenverlust:** Die `self_update.py` löscht nun nicht mehr das gesamte Zielverzeichnis vor dem Update. Dies verhindert das versehentliche Löschen von Nutzer-Konfigurationen (`e3dc.config.txt`), falls der Installer im Hauptverzeichnis betrieben wird.
+*   **Merge-Logik:** Neue Dateien werden hinzugefügt oder überschrieben, bestehende Konfigurationsdateien bleiben unberührt.
+ 
+### 🌐 Web-Portal & Installer
+*   **Repository-Integration:** Der Installer nutzt nun nativ den `html`-Ordner aus dem Repository. Die Logik für externe ZIP-Dateien wurde durch eine direkte Kopiermethode aus dem Projektverzeichnis ersetzt.
+*   **Permissions-Fix:** `permissions.py` erstellt keine leeren Platzhalter-Dateien mehr für fehlende Web-Komponenten, was zuvor zu "kaputten" Dashboards führen konnte.
+*   **Failsafe:** Syntax-Korrektur in der Installations-Routine des Web-Portals sorgt für zuverlässige Einrichtung auch bei Updates.
+ 
+## [2.6.7 Classic] - Hotfix Installer & Update-Logik
+ 
+### 🔧 Bugfixes & Stabilität
+*   **Installer-Fix:** Behebung des `PLOT_SCRIPT_NAME` Fehlers, der die Diagramm-Installation verhinderte.
+*   **Config-Fix:** Fehler beim Kopieren der Konfigurationsdatei behoben, wenn Quelle und Ziel identisch sind (SameFileError).
+*   **Update-Silence:** 404-Netzwerkfehler bei der Update-Prüfung werden nun unterdrückt, solange noch keine Releases im neuen Repository vorhanden sind.
+*   **Code-Robustheit:** Import von `HTTPError` für stabileres Error-Handling hinzugefügt.
 
 ## [2.6.6 Classic] - Repository Separation & Clean Update
 

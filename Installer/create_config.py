@@ -45,9 +45,12 @@ def copy_existing_config():
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
         
         # Datei kopieren
-        shutil.copy2(source_path, CONFIG_FILE)
-        print(f"✓ Datei kopiert: {source_path} → {CONFIG_FILE}")
-        config_logger.info(f"Konfigurationsdatei kopiert von {source_path} nach {CONFIG_FILE}")
+        if os.path.abspath(source_path) != os.path.abspath(CONFIG_FILE):
+                shutil.copy2(source_path, CONFIG_FILE)
+                print(f"✓ Datei kopiert: {source_path} → {CONFIG_FILE}")
+                config_logger.info(f"Konfigurationsdatei kopiert von {source_path} nach {CONFIG_FILE}")
+        else:
+                print("✓ Datei bereits am Zielort vorhanden (kein Kopieren nötig).")
         
         # Berechtigungen setzen
         try:
