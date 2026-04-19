@@ -22,9 +22,7 @@ $defaults = [
     "ladeschwelle" => "70", "ladeende" => "85", "ladeende2" => "91", "ladeende2rampe" => "2",
     "maximumladeleistung" => "12500", "awattar" => "1", "awmwst" => "19", "awnebenkosten" => "15.915",
     "awaufschlag" => "12", "awland" => "DE", "awreserve" => "20", "awsimulation" => "1",
-    "wp" => "true", "wpheizlast" => "18", "wpheizgrenze" => "13", "wpleistung" => "20",
-    "wpmin" => "0.5", "wpmax" => "4.7", "wpehz" => "12 kW", "wpzwe" => "-99", "wpzwepvon" => "25",
-    "luxtronik" => "0", "luxtronik_ip" => "192.168.178.88", "wrleistung" => "11700", "hoehe" => "48.60442", "laenge" => "13.41513", 
+    "wrleistung" => "11700", "hoehe" => "48.60442", "laenge" => "13.41513",  
     "forecast1" => "40/-50/15.4", "forecastsoc" => "1.2", "forecastconsumption" => "1", "forecastreserve" => "5", "show_forecast" => "1", "darkmode" => "1", "pvatmosphere" => "0.7",
     "check_updates" => "1", "stop" => "0"
 ];
@@ -56,17 +54,7 @@ $tooltips = [
     "awland" => "Land für Preisberechnung.",
     "awreserve" => "Reserve-SoC für Verbrauchsprognose.",
     "awsimulation" => "Zusätzliche PV-Spalte in Simulation aktivieren.",
-    "wp" => "Wärmepumpe vorhanden = true.",
-    "wpheizlast" => "Heizlast der Wärmepumpe.",
-    "wpheizgrenze" => "Temperaturgrenze für Heizbetrieb.",
-    "wpleistung" => "Elektrische Leistung der WP.",
-    "wpmin" => "Minimale elektrische Leistung.",
-    "wpmax" => "Maximale elektrische Leistung.",
-    "wpehz" => "Leistung der elektrischen Zusatzheizung.",
-    "wpzwe" => "ZWE-Modus.",
-    "wpzwepvon" => "Temperaturgrenze für ZWE.",
-    "luxtronik" => "Aktiviert das Luxtronik-Modul (1=an, 0=aus).",
-    "luxtronik_ip" => "IP-Adresse der Luxtronik Wärmepumpe.",
+
     "hoehe" => "Geografische Höhe für Sonnenstandsberechnung.",
     "laenge" => "Geografische Länge für Sonnenstandsberechnung.",
     "forecast1" => "Dachneigung/Azimuth/kWp.",
@@ -88,7 +76,7 @@ $tooltips = [
     "rb" => "Untere SoC-Schwelle für die Entladesperre.",
     "re" => "Obere SoC-Schwelle für die Entladesperre.",
     "le" => "Lade-Ende Schwelle (SoC).",
-    "shellyem_ip" => "IP-Adresse des Shelly EM zur Leistungsmessung.",
+
     "openmeteo" => "Wetterprognose über Open-Meteo beziehen (true/false).",
     "server_ip" => "IP-Adresse des E3DC S10 Hauskraftwerks.",
     "server_port" => "Netzwerk-Port für RSCP (Standard: 5033).",
@@ -173,9 +161,8 @@ $groups = [
     "Wallbox" => ["wallbox","wbmode","wbminlade","wbminsoc","wbmaxladestrom","wbminladestrom","wbhour","wbvon","wbbis","wbtest"],
     "Speicher / Ladesteuerung" => ["speichergroesse","speicherev","speichereta","unload","wrleistung","einspeiselimit","ladeschwelle","ladeende","ladeende2","ladeende2rampe","maximumladeleistung","powerfaktor","rb","re","le"],
     "Awattar / Preise" => ["awattar","awmwst","awnebenkosten","awaufschlag","awland","awreserve","awsimulation"],
-    "Wärmepumpe" => ["wp","wpheizlast","wpheizgrenze","wpleistung","wpmin","wpmax","wpehz","wpzwe","wpzwepvon","shellyem_ip"],
     "Standort / Wetter" => ["openmeteo","hoehe","laenge","forecast1","forecast2","forecast3","forecast4","forecast5","forecastsoc","forecastconsumption","forecastreserve"],
-    "Webansicht / Dashboard" => ["show_forecast","wbcostpowers","darkmode","pvatmosphere","luxtronik","luxtronik_ip","check_updates"],
+    "Webansicht / Dashboard" => ["show_forecast","wbcostpowers","darkmode","pvatmosphere","check_updates"],
     "System" => ["server_ip","server_port","e3dc_user","e3dc_password","aes_password","debug","logfile","wurzelzaehler","ext1","ext2","wrsteuerung"],
     "Sonstiges" => [] 
 ];

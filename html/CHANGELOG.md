@@ -1,4 +1,16 @@
 # Changelog
+ 
+## [2.6.6 Classic] - Repository Separation & Clean Update
+ 
+### 🚀 Self-Update & Branching
+*   **Repository-Wechsel:** Der Installer ist nun fest mit dem neuen Classic-Repository `A9xxx/E3DC-Classic` verknüpft. Dies verhindert ungewollte "Updates" auf die inkompatible V4-Version aus dem Hauptzweig.
+*   **Intelligentes Update:** Die Extraktions-Logik im Self-Update wurde flexibler gestaltet. Der Installer findet nun automatisch das korrekte Verzeichnis in der Update-ZIP, basierend auf der Dateistruktur des Classic-Repositories.
+ 
+### 🧹 System & Stabilität (Classic-Zweig)
+*   **Kein Python mehr für Diagramme:** Im Classic-Modus laufen keine großen Python-Hintergrundscripte (`plot_soc_changes.py`, `plot_live_history.py`) mehr auf dem Server.
+*   **Webbasierte Diagramme:** Sämtliche Leistungsverläufe (Live, Historie) und der Speicher-SoC/aWATTar Prognose-Chart werden nun rasend schnell komplett im Browser (Client-Side Plotly.js) via `diagramm.php` und `live_diagramm.php` gezeichnet.
+*   **Installer-Cleanup:** Die Setup-Skripte richten das System nun komplett ohne die alten Plotly-Python-Libraries und ohne Diagramm-Crontabs ein. Entfernung von `plotly`, `pandas` und `matplotlib` aus den Abhängigkeiten.
+*   **Unabhängigkeit:** Diese Version ist nun vollständig eigenständig und als "schneller, purer C++ Web-Wrapper" für ältere Hardware (Pi 3B / Pi Zero) optimiert.
 
 ## [2026.03.04] - Wallbox-Status, Diagramm-Details & Installer-Fixes
 

@@ -3,9 +3,8 @@
    mobile_history.php - Mobile Historie mit Zeitauswahl
    ===================================================================== */
 $paths = getInstallPaths();
-$live_diagramm = '/var/www/html/live_diagramm.html';
-$live_history_script = rtrim($paths['install_path'], '/') . '/plot_live_history.py';
-$live_diagramm_stamp = '/var/www/html/tmp/plot_live_history_last_run';
+$live_diagramm = '/var/www/html/live_diagramm.php';
+$live_diagramm = '/var/www/html/live_diagramm.php';
 $backups = getHistoryBackupFiles();
 
 // Automatisches Update beim Laden der Seite wurde entfernt. Update nur noch manuell per Button.
@@ -43,7 +42,7 @@ $backups = getHistoryBackupFiles();
 </div>
 
 <div class="ratio ratio-1x1 w-100" style="min-height: 400px; max-height: 70vh;">
-    <iframe id="historyFrame" src="live_diagramm.html?t=<?= file_exists($live_diagramm) ? filemtime($live_diagramm) : time() ?>" style="width:100%; height:100%; border:none; border-radius: 8px;" title="Live Historie"></iframe>
+    <iframe id="historyFrame" src="live_diagramm.php?t=<?= file_exists($live_diagramm) ? filemtime($live_diagramm) : time() ?>" style="width:100%; height:100%; border:none; border-radius: 8px;" title="Live Historie"></iframe>
 </div>
 
 <script>
@@ -58,7 +57,7 @@ $backups = getHistoryBackupFiles();
     var currentFile = '';
     window.triggerHistoryUpdate = triggerUpdate; // Make it globally accessible
 
-    // Button Click-Logik für Zeitauswahl
+    // Button Click-Logik fÃ¼r Zeitauswahl
     timeBtns.forEach(function(tBtn) {
         tBtn.addEventListener('click', function() {
             // Aktiven Status umschalten
@@ -73,10 +72,10 @@ $backups = getHistoryBackupFiles();
         });
     });
 
-    // Dropdown Logik für Archiv-Dateien
+    // Dropdown Logik fÃ¼r Archiv-Dateien
     archiveSelect.addEventListener('change', function() {
         if (this.value === 'live') {
-            // Zurück zu Live-Daten
+            // ZurÃ¼ck zu Live-Daten
             currentFile = '';
             filterGroup.classList.remove('d-none');
             // Aktuelle Stunden vom aktiven Button holen
@@ -84,7 +83,7 @@ $backups = getHistoryBackupFiles();
             currentHours = activeBtn ? activeBtn.getAttribute('data-hours') : 6;
             triggerUpdate();
         } else if (this.value) {
-            // Archiv-Datei gewählt
+            // Archiv-Datei gewÃ¤hlt
             currentFile = this.value;
             currentHours = 24;
             filterGroup.classList.add('d-none');
@@ -97,29 +96,19 @@ $backups = getHistoryBackupFiles();
     function triggerUpdate(){
         btn.disabled = true;
         archiveSelect.disabled = true;
-        timeBtns.forEach(b => b.disabled = true); // Buttons sperren während geladen wird
+        timeBtns.forEach(b => b.disabled = true); // Buttons sperren wÃ¤hrend geladen wird
         
-        var msg = currentFile ? 'Lade Archiv ' + archiveSelect.options[archiveSelect.selectedIndex].text + '...' : 'Erstelle ' + currentHours + 'h Diagramm…';
+        var msg = currentFile ? 'Lade Archiv ' + archiveSelect.options[archiveSelect.selectedIndex].text + '...' : 'Erstelle ' + currentHours + 'h Diagrammâ€¦';
         if (status) status.textContent = msg;
         
-        // Parameter hours an das Backend senden
-        var url = '?action=run_live_history&hours=' + currentHours + (currentFile ? '&file=' + encodeURIComponent(currentFile) : '') + '&dark=' + (DARK_MODE ? '1' : '0');
+        var url = 'live_diagramm.php?hours=' + currentHours + (currentFile ? '&file=' + encodeURIComponent(currentFile) : '') + '&dark=' + (DARK_MODE ? '1' : '0') + '&t=' + Date.now();
         
-        fetch(url).then(function(r){ return r.json(); }).then(function(d){
-            if (!d.ok) { if (status) status.textContent = d.error || 'Fehler'; resetBtns(); return; }
-            
-            var check = setInterval(function(){
-                fetch('?action=run_live_history&mode=status').then(function(r){ return r.json(); }).then(function(s){
-                    if (!s.running) {
-                        clearInterval(check);
-                        if (status) status.textContent = 'Fertig';
-                        frame.src = 'live_diagramm.html?t=' + Date.now();
-                        resetBtns();
-                        setTimeout(function(){ if (status) status.textContent = ''; }, 2000);
-                    }
-                });
-            }, 1000);
-        }).catch(function(){ if (status) status.textContent = 'Fehler'; resetBtns(); });
+        frame.src = url;
+        frame.onload = function() {
+            if (status) status.textContent = 'Fertig';
+            resetBtns();
+            setTimeout(function(){ if (status) status.textContent = ''; }, 2000);
+        };
     }
 
     function resetBtns() {

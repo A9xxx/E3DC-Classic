@@ -24,7 +24,7 @@ require_once 'logic.php';
 
 // FIX: Wandernder Preis-Graph
 // Wir versuchen, die statische awattardebug.23.txt zu laden, damit der Graph nicht immer bei "jetzt" beginnt.
-// Wir übernehmen die MwSt ($awmwst oder $mwst) aus der logic.php, falls vorhanden.
+// Wir Ã¼bernehmen die MwSt ($awmwst oder $mwst) aus der logic.php, falls vorhanden.
 $vatToUse = isset($awmwst) ? $awmwst : (isset($mwst) ? $mwst : 0);
 $staticData = loadStaticPriceData($vatToUse);
 $useStaticData = false;
@@ -62,7 +62,7 @@ $seite = $_GET['seite'] ?? 'live';
             --chart-overlay: rgba(0,0,0,0.05);
         }
         body { background-color: var(--bg-body); color: var(--text-body); font-family: -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s; }
-        /* Globaler Hover-Effekt für Desktop-Nutzer (Finger-Cursor) */
+        /* Globaler Hover-Effekt fÃ¼r Desktop-Nutzer (Finger-Cursor) */
         button, .nav-item, .btn, [onclick], .fill-bar { cursor: pointer; }
         .dashboard-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 20px; padding: 18px; position: relative; overflow: hidden; height: 100%; transition: background 0.3s, border-color 0.3s; }
         .fill-bar { position: absolute; top: 0; left: 0; height: 100%; transition: width 1.5s ease-in-out, background 0.5s; z-index: 1; opacity: 0.18; }
@@ -97,7 +97,7 @@ $seite = $_GET['seite'] ?? 'live';
         .mode-desktop .dashboard-card { margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
         .mode-desktop #diagramContainer { display: block !important; }
         .mode-desktop #toggleDiagramBtn { display: none; }
-        /* Korrektur für den Status-Kreis im Stop-Feld auf Desktop */
+        /* Korrektur fÃ¼r den Status-Kreis im Stop-Feld auf Desktop */
         .mode-desktop .status-kreis { float: left; margin-right: 15px; position: static; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -172,17 +172,11 @@ $seite = $_GET['seite'] ?? 'live';
             </div>
         </div>
 
-        <div class="row g-2 mb-2" id="wb-wp-row">
+        <div class="row g-2 mb-2" id="wb-row">
             <div id="card-wb" class="col-12" style="display:none;" onclick="toggleDiagram('wb')">
                 <div class="dashboard-card">
                     <div id="fill-wb" class="fill-bar" style="width: 0%; background: #a855f7;"></div>
                     <div class="card-content"><div class="label">Wallbox</div><div class="value wb-val" id="val-wb">0</div></div>
-                </div>
-            </div>
-            <div id="card-wp" class="col-12" style="display:none;" onclick="<?= $luxtronikEnabled ? "window.location.href='mobile.php?seite=luxtronik'" : "toggleDiagram('normal')" ?>">
-                <div class="dashboard-card">
-                    <div id="fill-wp" class="fill-bar" style="width: 0%; background: #22d3ee;"></div>
-                    <div class="card-content"><div class="label">Wärmepumpe</div><div class="value wp-val" id="val-wp">0</div></div>
                 </div>
             </div>
         </div>
@@ -252,11 +246,7 @@ $seite = $_GET['seite'] ?? 'live';
             </button>
         </div>
         <?php include 'config_editor.php'; ?>
-    <?php elseif ($seite == 'luxtronik' && $luxtronikEnabled): ?>
-        <div class="mb-3">
-            <a href="mobile.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Zurück</a>
-        </div>
-        <?php include 'luxtronik.php'; ?>
+
     <?php elseif ($seite == 'history'): include 'history.php';
           elseif ($seite == 'archiv'): include 'archiv.php';
     endif; ?>
@@ -322,9 +312,9 @@ function toggleDarkMode(el) {
 
     // Refresh currently visible diagram to apply the new theme
     const currentPage = '<?= $seite ?>';
-    // WICHTIG: Auch wenn der Container gerade ausgeblendet ist, wollen wir beim nächsten Öffnen
+    // WICHTIG: Auch wenn der Container gerade ausgeblendet ist, wollen wir beim nÃ¤chsten Ã–ffnen
     // das richtige Theme. Aber um Serverlast zu sparen, aktualisieren wir nur, wenn sichtbar
-    // ODER wir setzen ein Flag, dass ein Update nötig ist.
+    // ODER wir setzen ein Flag, dass ein Update nÃ¶tig ist.
     if (currentPage === 'live') {
         updateDiagram();
     } else if (currentPage === 'forecast') {
@@ -405,7 +395,7 @@ function updateDashboard() {
                     fElem.innerHTML = `Prog: ${formatWatts(fVal)} (${pctStr})${sollStr}`;
                     
                     if (fVal > 0 && ratio < 0.75) fElem.style.color = '#d56666'; // Rot (< 75%)
-                    else if (fVal > 0 && ratio > 1.25) fElem.style.color = '#10b981'; // Grün (> 125%)
+                    else if (fVal > 0 && ratio > 1.25) fElem.style.color = '#10b981'; // GrÃ¼n (> 125%)
                     else fElem.style.color = '#fbbf24'; // Gelb (Standard)
                     
                     fElem.style.display = 'block';
@@ -426,7 +416,7 @@ function updateDashboard() {
         document.getElementById('val-bat').className = batClass;
 
         batFill.style.width = (data.soc || 0) + '%';
-        batFill.style.background = (bat >= 0) ? '#10b981' : '#ef4444'; // + Grün (Laden), - Rot (Entladen)
+        batFill.style.background = (bat >= 0) ? '#10b981' : '#ef4444'; // + GrÃ¼n (Laden), - Rot (Entladen)
         
         let absBat = Math.abs(bat);
         if (absBat > 20) {
@@ -460,7 +450,7 @@ function updateDashboard() {
         document.getElementById('label-soc').innerHTML = `Batterie (${data.soc}%)${capInfo}<span>${timeInfo}</span>`;
 
         // Haus & Netz
-        let h = (data.wp > 10) ? Math.max(0, (data.home_raw || 0)-data.wp) : (data.home_raw || 0);
+        let h = (data.home_raw || 0);
         document.getElementById('val-home').innerHTML = formatWatts(h);
         document.getElementById('fill-home').style.width = Math.min(100, (h / AVGS.home) * 100) + '%';
         
@@ -470,21 +460,18 @@ function updateDashboard() {
         document.getElementById('val-grid').innerHTML = gridIcon + formatWatts(grid);
         document.getElementById('val-grid').className = 'value ' + (grid <= 0 ? 'text-success' : 'text-danger');
         gridFill.style.width = Math.min(100, (Math.abs(grid) / AVGS.grid) * 100) + '%';
-        gridFill.style.background = (grid <= 0) ? '#10b981' : '#f43f5e'; // - Grün (Einspeisung), + Rot (Bezug)
+        gridFill.style.background = (grid <= 0) ? '#10b981' : '#f43f5e'; // - GrÃ¼n (Einspeisung), + Rot (Bezug)
 
-        // WP & WB Layout
-        const wpC = document.getElementById('card-wp'); const wbC = document.getElementById('card-wb');
-        wpC.style.display = data.wp > 10 ? 'block' : 'none';
+        // WB Layout
+        const wbC = document.getElementById('card-wb');
         wbC.style.display = data.wb > 0 ? 'block' : 'none';
-        if (data.wp > 10 && data.wb > 0) { wpC.className = 'col-6'; wbC.className = 'col-6'; }
-        else { wpC.className = 'col-12'; wbC.className = 'col-12'; }
-        if (data.wp > 10) { document.getElementById('val-wp').innerHTML = formatWatts(data.wp); document.getElementById('fill-wp').style.width = Math.min(100, (data.wp / WP_MAX) * 100) + '%'; }
+        wbC.className = 'col-12';
         if (data.wb > 0) { 
             document.getElementById('val-wb').innerHTML = formatWatts(data.wb); 
             let wbFill = document.getElementById('fill-wb');
             wbFill.style.width = Math.min(100, (data.wb / AVGS.wb) * 100) + '%';
             
-            let ratio = Math.min(1, data.wb / 11000); // 11kW Referenz für Animation
+            let ratio = Math.min(1, data.wb / 11000); // 11kW Referenz fÃ¼r Animation
             let speed = 10.0 - (ratio * 8.4);
             let intensity = 0.25 + (ratio * 0.55);
             wbFill.style.setProperty('--pulse-speed', speed + 's');
@@ -528,12 +515,12 @@ function updateDashboard() {
                 minTime = gmtToLocal(data.price_min_slot);
                 maxTime = gmtToLocal(data.price_max_slot);
 
-                // Tendenz vorab berechnen für die Hauptanzeige
+                // Tendenz vorab berechnen fÃ¼r die Hauptanzeige
                 let prices = (data.prices && data.prices.length > 0) ? data.prices : PRICE_HISTORY;
                 let startHour = PRICE_START_HOUR;
                 let interval = PRICE_INTERVAL;
 
-                // Wenn statische Daten geladen wurden (z.B. awattardebug.23.txt), nutzen wir diese für den Chart,
+                // Wenn statische Daten geladen wurden (z.B. awattardebug.23.txt), nutzen wir diese fÃ¼r den Chart,
                 // da die Live-Daten (data.prices) oft abgeschnitten sind (Strich ganz links).
                 if (USE_STATIC_CHART) {
                     prices = PRICE_HISTORY;
@@ -588,16 +575,16 @@ function updateDashboard() {
 
                         const xStart = (i / prices.length) * 240;
                         const xEnd = ((i + 1) / prices.length) * 240;
-                        const y = 100 - ((prices[i] - min) / range * 60 + 5); // Skaliert auf max 60% Höhe
+                        const y = 100 - ((prices[i] - min) / range * 60 + 5); // Skaliert auf max 60% HÃ¶he
                         pathData += ` L ${xStart} ${y} H ${xEnd}`;
                         if (i < prices.length - 1) {
                             const nextY = 100 - ((prices[i+1] - min) / range * 60 + 5);
                             pathData += ` V ${nextY}`;
                         }
                     }
-                    pathData += " L 240 100 Z"; // Schließen nach unten rechts
+                    pathData += " L 240 100 Z"; // SchlieÃŸen nach unten rechts
                     
-                    // Farbige Balken für Min/Max generieren
+                    // Farbige Balken fÃ¼r Min/Max generieren
                     let bars = "";
                     const slotW = 240 / prices.length;
                     const getY = (p) => 100 - ((p - min) / range * 60 + 5);
@@ -652,7 +639,7 @@ function updateDashboard() {
                         const pctToday = (posToday / totalHours) * 100;
                         const pctTomorrow = (posTomorrow / totalHours) * 100;
                         
-                        // Linie für Morgen
+                        // Linie fÃ¼r Morgen
                         if (pctTomorrow > 0 && pctTomorrow < 100) { 
                             dayLine.style.left = pctTomorrow + '%'; dayLine.style.display = 'block'; 
                             if (dayOverlay) { dayOverlay.style.left = pctTomorrow + '%'; dayOverlay.style.display = 'block'; }
@@ -670,7 +657,7 @@ function updateDashboard() {
                             dayLabel.style.display = (pctTomorrow < 100) ? 'block' : 'none';
                         }
 
-                        // Linie für Heute (Start of Today)
+                        // Linie fÃ¼r Heute (Start of Today)
                         if (pctToday > 0 && pctToday < 100) { 
                             yesterdayLine.style.left = pctToday + '%'; yesterdayLine.style.display = 'block'; 
                         } else { 
@@ -712,7 +699,7 @@ function updateDashboard() {
                 }
             }
 
-        // Details über dem Diagramm aktualisieren
+        // Details Ã¼ber dem Diagramm aktualisieren
         const detailsEl = document.getElementById('diagramDetails');
         const diagContainer = document.getElementById('diagramContainer');
         if (detailsEl && diagContainer.style.display !== 'none') {
@@ -760,11 +747,11 @@ function toggleDiagram(view = 'normal') {
     if (c.style.display === 'none' || CURRENT_VIEW !== view) {
         c.style.display = 'block';
         const now = Math.floor(Date.now() / 1000);
-        // Automatisches Update nur wenn älter als 15 Min (900 Sek)
+        // Automatisches Update nur wenn Ã¤lter als 15 Min (900 Sek)
         if (now - lastUpdateTs > 900) {
             updateDiagram();
         } else if (!f.src || f.src === window.location.href) {
-            f.src = 'live_diagramm.html?t=' + Date.now();
+            f.src = 'live_diagramm.php?t=' + Date.now();
         }
         CURRENT_VIEW = view;
         updateDashboard(); // Sofort Details aktualisieren
@@ -792,39 +779,13 @@ function updateDiagram() {
     btn.disabled = true;
     status.textContent = 'Lade Daten...';
     
-    const timestamp = Date.now();
-    fetch('mobile.php?action=run_live_history&hours=' + currentLiveHours + '&view=' + CURRENT_VIEW + '&dark=' + (DARK_MODE ? '1' : '0'))
-    .then(r => r.json())
-    .then(data => {
-        if (data.ok) {
-            const checkInterval = setInterval(() => {
-                fetch('mobile.php?action=status&mode=mobile')
-                .then(r => r.json())
-                .then(stat => {
-                    if (!stat.running) {
-                        clearInterval(checkInterval);
-                        // Nur neu laden, wenn kein Fehler vorliegt
-                        if (!stat.error) {
-                            const newUrl = 'live_diagramm.html?t=' + Date.now();
-                            frame.contentWindow.location.replace(newUrl);
-                            lastUpdateTs = Math.floor(Date.now() / 1000);
-                            status.textContent = 'Aktualisiert';
-                            setTimeout(updateLastUpdateDisplay, 2000);
-                        } else {
-                            status.textContent = 'Fehler!';
-                        }
-                        btn.disabled = false;
-                    }
-                });
-            }, 1000);
-        } else {
-            status.textContent = 'Fehler: ' + (data.error || 'Unbekannt');
-            btn.disabled = false;
-        }
-    }).catch(() => {
-        status.textContent = 'Fehler';
+    frame.src = 'live_diagramm.php?hours=' + currentLiveHours + '&view=' + CURRENT_VIEW + '&t=' + Date.now();
+    frame.onload = function() {
         btn.disabled = false;
-    });
+        lastUpdateTs = Math.floor(Date.now() / 1000);
+        status.textContent = 'Aktualisiert';
+        setTimeout(updateLastUpdateDisplay, 2000);
+    };
 }
 
 function updateForecast() {
@@ -834,39 +795,11 @@ function updateForecast() {
     
     if(btn) btn.disabled = true;
     if(status) status.textContent = 'Berechne Prognose...';
-    
-    fetch('mobile.php?action=run_now&mode=mobile&dark=' + (DARK_MODE ? '1' : '0'))
-    .then(r => r.text())
-    .then(txt => {
-        if (txt === 'started' || txt === 'running') {
-            const checkInterval = setInterval(() => {
-                fetch('mobile.php?action=status&mode=mobile')
-                .then(r => r.json())
-                .then(stat => {
-                    if (!stat.running) {
-                        clearInterval(checkInterval);
-                        if (!stat.error) {
-                            frame.src = 'diagramm_mobile.html?t=' + Date.now();
-                            if(status) status.textContent = 'Aktualisiert: ' + new Date().toLocaleTimeString();
-                        } else {
-                            if(status) status.textContent = 'Fehler bei der Berechnung';
-                        }
-                        if(btn) btn.disabled = false;
-                    }
-                });
-            }, 1000);
-        } else if (txt === 'skipped') {
-             if(status) status.textContent = 'Daten sind aktuell.';
-             if(btn) btn.disabled = false;
-        } else {
-             if(status) status.textContent = 'Fehler: ' + txt;
-             if(btn) btn.disabled = false;
-        }
-    })
-    .catch(() => {
-        if(status) status.textContent = 'Netzwerkfehler';
+    frame.src = 'diagramm.php?t=' + Date.now();
+    frame.onload = function() {
         if(btn) btn.disabled = false;
-    });
+        if(status) status.textContent = 'Aktualisiert: ' + new Date().toLocaleTimeString();
+    };
 }
 
 function startSystemUpdate() {
@@ -875,7 +808,7 @@ function startSystemUpdate() {
     const closeBtn = document.getElementById('update-close-btn');
     const finishBtn = document.getElementById('update-finish-btn');
 
-    // Prüfung vorab
+    // PrÃ¼fung vorab
     fetch('mobile.php?action=check_update&force_check=1').then(r=>r.json()).then(d => {
         // UI sofort aktualisieren, wenn Updates gefunden wurden
         if (d.success && d.missing > 0) {
@@ -895,7 +828,7 @@ function startSystemUpdate() {
             alert("Das System ist auf dem neuesten Stand.");
             return;
         }
-        if (!confirm(`Es sind ${d.missing || 0} Updates verfügbar.\nUpdate jetzt starten?`)) return;
+        if (!confirm(`Es sind ${d.missing || 0} Updates verfÃ¼gbar.\nUpdate jetzt starten?`)) return;
 
         // Optionen an Server senden
         fetch('mobile.php?action=prepare_update&force=false&discard=false')
@@ -908,7 +841,7 @@ function startSystemUpdate() {
         spinner.className = "fas fa-sync fa-spin me-2";
         closeBtn.style.display = 'none';
         finishBtn.disabled = true;
-        finishBtn.innerText = "Schließen";
+        finishBtn.innerText = "SchlieÃŸen";
         
         // Start Request
         fetch('mobile.php?action=run_update&mode=start&t=' + Date.now())
@@ -933,7 +866,7 @@ function startSystemUpdate() {
         let tick = 0;
         const interval = setInterval(() => {
             tick++;
-            // Zeitstempel anhängen um Cloudflare-Cache zu umgehen
+            // Zeitstempel anhÃ¤ngen um Cloudflare-Cache zu umgehen
             fetch('mobile.php?action=run_update&mode=poll&t=' + Date.now())
                 .then(r => r.json())
                 .then(data => {
@@ -943,7 +876,7 @@ function startSystemUpdate() {
                     const modalBody = log.parentElement;
                     modalBody.scrollTop = modalBody.scrollHeight;
 
-                    // Prüfen ob Erfolgsmeldung im Log steht (Fallback, falls Prozess-Status hängt)
+                    // PrÃ¼fen ob Erfolgsmeldung im Log steht (Fallback, falls Prozess-Status hÃ¤ngt)
                     const logText = data.log || "";
                     const successFound = logText.includes("Update erfolgreich abgeschlossen") || 
                                          logText.includes("Du bist auf dem neuesten Stand") ||
@@ -966,10 +899,10 @@ function startSystemUpdate() {
         
         if (logText.includes("Update erfolgreich abgeschlossen") || logText.includes("Du bist auf dem neuesten Stand")) {
             spinner.classList.add('fa-check-circle', 'text-success');
-            log.innerText += "\n\n✓ Vorgang erfolgreich beendet.";
+            log.innerText += "\n\nâœ“ Vorgang erfolgreich beendet.";
         } else {
             spinner.classList.add('fa-times-circle', 'text-danger');
-            log.innerText += "\n\n✗ Update fehlgeschlagen oder unvollständig.";
+            log.innerText += "\n\nâœ— Update fehlgeschlagen oder unvollstÃ¤ndig.";
         }
 
         closeBtn.style.display = 'block';
@@ -979,7 +912,7 @@ function startSystemUpdate() {
 
 updateDashboard(); setInterval(updateDashboard, 4000);
 
-// Initialisierung für Desktop-Modus
+// Initialisierung fÃ¼r Desktop-Modus
 window.addEventListener('DOMContentLoaded', () => {
     if (document.body.classList.contains('mode-desktop')) {
         document.getElementById('diagramFrame').src = 'diagramm_mobile.html?t=' + Date.now();
@@ -1003,7 +936,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }, 2000);
     
-    // Periodische Prüfung alle 60 Minuten
+    // Periodische PrÃ¼fung alle 60 Minuten
     setInterval(() => {
         fetch('mobile.php?action=check_update').then(r=>r.json()).then(d => {
             const bNav = document.getElementById('update-badge-nav');
@@ -1019,15 +952,15 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 3600000);
 
     window.restartService = function() {
-        if (!confirm('Möchtest du den E3DC-Control Service wirklich neu starten?')) return;
+        if (!confirm('MÃ¶chtest du den E3DC-Control Service wirklich neu starten?')) return;
         
         fetch('mobile.php?action=restart_service')
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    alert("✓ Service wird neu gestartet.");
+                    alert("âœ“ Service wird neu gestartet.");
                 } else {
-                    alert("✗ Fehler: " + data.message);
+                    alert("âœ— Fehler: " + data.message);
                 }
             })
             .catch(err => alert("Netzwerkfehler: " + err));
@@ -1076,7 +1009,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const isOffline = badge.classList.contains('bg-danger') || badge.classList.contains('bg-warning');
         
         if (isOffline) {
-            if (confirm("Verbindungsprobleme erkannt.\nMöchtest du den E3DC-Service neu starten?")) {
+            if (confirm("Verbindungsprobleme erkannt.\nMÃ¶chtest du den E3DC-Service neu starten?")) {
                 restartService();
             } else {
                 badge.innerText = "Lade...";
@@ -1097,7 +1030,7 @@ window.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error('Service Worker Registrierung fehlgeschlagen:', err));
     });
   } else {
-    console.log('Service Worker wird von diesem Browser nicht unterstützt.');
+    console.log('Service Worker wird von diesem Browser nicht unterstÃ¼tzt.');
   }
 </script>
 </body>

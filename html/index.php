@@ -16,7 +16,7 @@ handleArchivDiagram();
 require_once 'logic.php';
 $seite = $_GET['seite'] ?? 'dashboard';
 
-// Archiv-Dateien für das Dropdown laden
+// Archiv-Dateien fÃ¼r das Dropdown laden
 $archivFiles = [];
 $historyFiles = [];
 $diagramMode = 'manual'; // Default
@@ -59,7 +59,7 @@ if ($seite === 'dashboard') {
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card { border-radius: 12px; transition: transform 0.2s; }
-        /* Hover-Effekt nur für Dashboard-Cards, nicht für Container in Unterseiten */
+        /* Hover-Effekt nur fÃ¼r Dashboard-Cards, nicht fÃ¼r Container in Unterseiten */
         .dashboard-view .card:hover { transform: translateY(-2px); border-color: #444; cursor: pointer; }
         .icon-box { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-radius: 16px; font-size: 1.75rem; }
         .val-large { font-size: 2.2rem; font-weight: 700; letter-spacing: -1px; }
@@ -76,7 +76,7 @@ if ($seite === 'dashboard') {
         .btn-group-custom .btn:hover, .btn-group-custom .btn.active { background-color: #333; color: #fff; border-color: #555; }
         .status-badge { font-size: 0.8rem; padding: 0.35em 0.65em; }
         
-        /* Anpassungen für inkludierte Seiten */
+        /* Anpassungen fÃ¼r inkludierte Seiten */
         .container-fluid { max-width: 1920px; }
     </style>
 </head>
@@ -222,7 +222,7 @@ if ($seite === 'dashboard') {
 
                             <!-- Archiv Controls -->
                             <select class="form-select form-select-sm border-secondary" id="archive-select" style="display:none; max-width: 200px;" onchange="loadArchive(this.value)">
-                                <option value="" disabled selected>Datei wählen...</option>
+                                <option value="" disabled selected>Datei wÃ¤hlen...</option>
                                 <?php foreach ($archivFiles as $af): ?>
                                     <option value="<?= htmlspecialchars($af['file']) ?>"><?= htmlspecialchars($af['label']) ?></option>
                                 <?php endforeach; ?>
@@ -234,7 +234,7 @@ if ($seite === 'dashboard') {
                     </div>
                     <div id="diagramDetails" class="px-3 pb-2 text-info small fw-bold" style="display:none;"></div>
                     <div class="card-body p-0 chart-container">
-                        <iframe id="chart-frame" src="diagramm.html?t=<?= time() ?>" scrolling="no"></iframe>
+                        <iframe id="chart-frame" src="diagramm.php?t=<?= time() ?>" scrolling="no"></iframe>
                     </div>
                 </div>
             </div>
@@ -287,28 +287,7 @@ if ($seite === 'dashboard') {
                         </div>
                     </div>
 
-                    <!-- Heatpump Card -->
-                    <div class="col-12">
-                        <div class="card" <?php if($luxtronikEnabled): ?>onclick="switchChartMode('live', 'wp')" style="cursor:pointer;"<?php endif; ?>>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="card-title text-muted text-uppercase small fw-bold mb-0"><i class="fas fa-water me-2"></i>Wärmepumpe</h6>
-                                    <?php if($luxtronikEnabled): ?>
-                                    <a href="index.php?seite=luxtronik" class="text-secondary" title="Details" onclick="event.stopPropagation();"><i class="fas fa-info-circle"></i></a>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box bg-info bg-opacity-10 text-info me-3" id="icon-wp" style="width: 48px; height: 48px; font-size: 1.25rem;">
-                                        <i class="fas fa-fan"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fs-4 fw-bold" id="val-wp">0<span class="fs-6 text-muted ms-1">W</span></div>
-                                        <div class="small text-muted">Leistung</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Quick Actions -->
                     <div class="col-12">
@@ -334,20 +313,7 @@ if ($seite === 'dashboard') {
                         </div>
                     </div>
                 </div>
-                <script>
-                    // Verschiebe Preis-Karte nach der Wärmepumpe-Karte
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const parent = document.getElementById('right-column-cards');
-                        if (parent) {
-                            const priceCard = parent.querySelector('.col-12:nth-child(1)');
-                            const heatpumpCard = parent.querySelector('.col-12:nth-child(3)');
-                            if (priceCard && heatpumpCard) {
-                                // Füge die Preiskarte nach der Wärmepumpenkarte ein
-                                heatpumpCard.after(priceCard);
-                            }
-                        }
-                    });
-                </script>
+
             </div>
         </div>
         </div>
@@ -355,25 +321,17 @@ if ($seite === 'dashboard') {
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-10 col-xl-8">
                     <div class="mb-3">
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Zurück zum Dashboard</a>
+                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>ZurÃ¼ck zum Dashboard</a>
                     </div>
                     <?php include 'Wallbox.php'; ?>
                 </div>
             </div>
-        <?php elseif ($seite === 'luxtronik' && $luxtronikEnabled): ?>
-            <div class="row justify-content-center">
-                <div class="col-12 col-lg-10 col-xl-8">
-                    <div class="mb-3">
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Zurück zum Dashboard</a>
-                    </div>
-                    <?php include 'luxtronik.php'; ?>
-                </div>
-            </div>
+
         <?php elseif ($seite === 'archiv'): ?>
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-10 col-xl-8">
                     <div class="mb-3">
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Zurück zum Dashboard</a>
+                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>ZurÃ¼ck zum Dashboard</a>
                     </div>
                     <?php include 'archiv.php'; ?>
                 </div>
@@ -382,7 +340,7 @@ if ($seite === 'dashboard') {
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-10 col-xl-8">
                     <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Zurück</a>
+                        <a href="index.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>ZurÃ¼ck</a>
                         <div>
                             <button id="btn-update-config" class="btn btn-outline-warning btn-sm me-2" onclick="startSystemUpdate()">
                                 <i class="fas fa-cloud-download-alt me-2"></i>Update <span id="update-badge-config" class="badge bg-danger ms-1" style="display:<?= getUpdateStatusFromCache() > 0 ? 'inline-block' : 'none' ?>;"><?= getUpdateStatusFromCache() ?></span>
@@ -426,7 +384,7 @@ if ($seite === 'dashboard') {
         setInterval(updateTime, 1000);
         updateTime();
 
-        // Konstanten aus logic.php für JS verfügbar machen
+        // Konstanten aus logic.php fÃ¼r JS verfÃ¼gbar machen
         let FORECAST_DATA = <?= json_encode($forecastData) ?>;
         const PV_STRINGS = <?= json_encode($pvStrings) ?>;
         const LAT = <?= json_encode($lat) ?>;
@@ -476,7 +434,7 @@ if ($seite === 'dashboard') {
                 value: DARK_MODE ? '1' : '0'
             });
             
-            // Diagramme aktualisieren (damit Python das neue Theme lädt)
+            // Diagramme aktualisieren (damit Python das neue Theme lÃ¤dt)
             setTimeout(() => refreshData(false), 100); // Kleiner Delay, damit Variable gesetzt ist
         }
 
@@ -566,7 +524,7 @@ if ($seite === 'dashboard') {
                 if (SHOW_FORECAST && (sollVal > 10 || (bestForecast && bestForecast.w > 10))) {
                     let fVal = (bestForecast && minDiff < 0.5) ? bestForecast.w : 0;
                     
-                    // Formatierung für kleine Anzeige
+                    // Formatierung fÃ¼r kleine Anzeige
                     const fmtSmall = (v) => (v >= 1000) ? (v/1000).toFixed(2) + 'k' : Math.round(v);
                     
                     let ratio = (fVal > 0) ? (data.pv / fVal) : 0;
@@ -578,7 +536,7 @@ if ($seite === 'dashboard') {
                     $('#val-pv-forecast').html(fText);
                     $('#val-pv-soll').text(fmtSmall(sollVal));
                     
-                    // Farb-Logik für Prognose (wie Mobile)
+                    // Farb-Logik fÃ¼r Prognose (wie Mobile)
                     if (fVal > 0 && ratio < 0.75) $('#val-pv-forecast').css('color', '#ef4444');
                     else if (fVal > 0 && ratio > 1.25) $('#val-pv-forecast').css('color', '#10b981');
                     else $('#val-pv-forecast').css('color', 'inherit');
@@ -599,12 +557,12 @@ if ($seite === 'dashboard') {
                 const wbLockOverlay = $('#wb-lock-overlay');
 
                 if (wbVal > 0) {
-                    // Wenn Leistung > 0: Blau leuchten (wie Wärmepumpe)
+                    // Wenn Leistung > 0: Blau leuchten
                     wbIcon.removeClass('bg-secondary text-secondary bg-warning text-warning').addClass('bg-info text-info pulsating');
                     // Schloss anzeigen wenn geladen wird? Meistens ja.
                     if (wbLocked) wbLockOverlay.show(); else wbLockOverlay.hide();
                 } else if (wbLocked) {
-                    // Angesteckt & Verriegelt, aber lädt nicht: Gelb
+                    // Angesteckt & Verriegelt, aber lÃ¤dt nicht: Gelb
                     wbIcon.removeClass('bg-secondary text-secondary bg-info text-info pulsating').addClass('bg-warning text-warning');
                     wbLockOverlay.show();
                 } else {
@@ -623,20 +581,13 @@ if ($seite === 'dashboard') {
 
                 // Status-Text Update
                 if (wbVal > 0) {
-                    $('#wb-status').text(`Lädt (${activePhases}-ph) | Mode ${wbMode}`);
+                    $('#wb-status').text(`LÃ¤dt (${activePhases}-ph) | Mode ${wbMode}`);
                 } else if (wbLocked) {
                     $('#wb-status').text(`Verbunden | Mode ${wbMode}`);
                 } else {
                     $('#wb-status').text('Bereit');
                 }
-                // Heatpump Logic
-                const wpVal = parseFloat(data.wp) || 0;
-                $('#val-wp').html(formatWatts(wpVal));
-                if (wpVal < 100) {
-                    $('#icon-wp').removeClass('bg-info text-info').addClass('bg-secondary text-muted');
-                } else {
-                    $('#icon-wp').removeClass('bg-secondary text-muted').addClass('bg-info text-info');
-                }
+
 
                 // Battery Logic
                 const batVal = Math.round(data.bat);
@@ -689,7 +640,7 @@ if ($seite === 'dashboard') {
                 if (gridVal > 0) { // Import (Bezug) -> Rot
                     gridIcon.removeClass('text-secondary text-success text-danger').addClass('text-danger');
                     gridContainer.removeClass('text-body text-success text-danger').addClass('text-danger');
-                } else if (gridVal < 0) { // Export (Einspeisung) -> Grün
+                } else if (gridVal < 0) { // Export (Einspeisung) -> GrÃ¼n
                     gridIcon.removeClass('text-secondary text-success text-danger').addClass('text-success');
                     gridContainer.removeClass('text-body text-success text-danger').addClass('text-success');
                 } else {
@@ -772,8 +723,7 @@ if ($seite === 'dashboard') {
                         }
                     } else if (CURRENT_VIEW === 'wb') {
                         if (data.wb_p1 !== undefined) content = `Wallbox L1: ${data.wb_p1}W | L2: ${data.wb_p2}W | L3: ${data.wb_p3}W`;
-                    } else if (CURRENT_VIEW === 'wp') {
-                        if (data.wp !== undefined) content = `Wärmepumpe: ${data.wp}W`;
+
                     } else if (CURRENT_VIEW === 'bat') {
                         if (data.bat_v !== undefined) content = `Spannung: ${data.bat_v}V | Strom: ${data.bat_a}A`;
                     }
@@ -811,7 +761,7 @@ if ($seite === 'dashboard') {
                         if (!status.running) {
                             clearInterval(checkInterval);
                             if(iframe) {
-                                iframe.src = 'live_diagramm.html?t=' + new Date().getTime();
+                                iframe.src = 'live_diagramm.php?t=' + new Date().getTime();
                                 iframe.style.opacity = '1';
                             }
                         }
@@ -822,7 +772,7 @@ if ($seite === 'dashboard') {
 
         function updateChartHistory(file) {
             if (!file) {
-                // Zurück zu Live (Standard 6h)
+                // ZurÃ¼ck zu Live (Standard 6h)
                 updateChart(6, document.querySelector('.btn-group-custom .btn:first-child'));
                 return;
             }
@@ -839,7 +789,7 @@ if ($seite === 'dashboard') {
                         if (!status.running) {
                             clearInterval(checkInterval);
                             if(iframe) {
-                                iframe.src = 'live_diagramm.html?t=' + new Date().getTime();
+                                iframe.src = 'live_diagramm.php?t=' + new Date().getTime();
                                 iframe.style.opacity = '1';
                             }
                         }
@@ -849,7 +799,7 @@ if ($seite === 'dashboard') {
         }
 
         function switchChartMode(mode, view = 'normal') {
-            // Dropdown synchronisieren (falls Aufruf über Button kam)
+            // Dropdown synchronisieren (falls Aufruf Ã¼ber Button kam)
             document.getElementById('chart-mode-select').value = mode;
             CURRENT_VIEW = view;
             
@@ -862,7 +812,7 @@ if ($seite === 'dashboard') {
                 title.innerHTML = '<i class="fas fa-chart-line me-2 text-secondary"></i>SoC Prognose';
                 if (liveControls) liveControls.style.display = 'none';
                 archiveSelect.style.display = 'none';
-                iframe.src = 'diagramm.html?t=' + new Date().getTime();
+                iframe.src = 'diagramm.php?t=' + new Date().getTime();
                 // Trigger update check with correct theme
                 $.get('index.php?action=run_now&dark=' + (DARK_MODE ? '1' : '0'));
             } else if (mode === 'live') {
@@ -871,14 +821,14 @@ if ($seite === 'dashboard') {
                 if (view === 'grid') titleText = 'Netz & WR Phasen';
                 if (view === 'bat') titleText = 'Batterie Details';
                 if (view === 'wb') titleText = 'Wallbox Phasen';
-                if (view === 'wp') titleText = 'Wärmepumpe Details';
+
                 
                 title.innerHTML = '<i class="fas fa-chart-area me-2 text-secondary"></i>' + titleText;
                 if (liveControls) liveControls.style.display = 'flex';
                 archiveSelect.style.display = 'none';
-                iframe.src = 'live_diagramm.html?t=' + new Date().getTime();
+                iframe.src = 'live_diagramm.php?t=' + new Date().getTime();
                 
-                // Sofortiges Update anstoßen, damit die neue Ansicht generiert wird
+                // Sofortiges Update anstoÃŸen, damit die neue Ansicht generiert wird
                 let hours = 6;
                 const activeBtn = document.querySelector('#live-controls .btn.active');
                 if (activeBtn) hours = parseInt(activeBtn.innerText);
@@ -889,9 +839,9 @@ if ($seite === 'dashboard') {
                 title.innerHTML = '<i class="fas fa-history me-2 text-secondary"></i>Archiv';
                 if (liveControls) liveControls.style.display = 'none';
                 archiveSelect.style.display = 'inline-block';
-                // Wenn noch keine Datei gewählt, erste wählen oder leer lassen
+                // Wenn noch keine Datei gewÃ¤hlt, erste wÃ¤hlen oder leer lassen
                 if (archiveSelect.options.length > 1 && archiveSelect.selectedIndex <= 0) {
-                   archiveSelect.selectedIndex = 1; // Erste echte Datei wählen
+                   archiveSelect.selectedIndex = 1; // Erste echte Datei wÃ¤hlen
                    loadArchive(archiveSelect.value);
                 } else if (archiveSelect.value) {
                    loadArchive(archiveSelect.value);
@@ -901,7 +851,7 @@ if ($seite === 'dashboard') {
 
         function loadArchive(file) {
             const iframe = document.getElementById('chart-frame');
-            iframe.src = 'index.php?action=archiv_diagram&file=' + encodeURIComponent(file) + '&ts=' + new Date().getTime() + '&dark=' + (DARK_MODE ? '1' : '0');
+            iframe.src = 'diagramm.php?file=' + encodeURIComponent(file) + '&ts=' + new Date().getTime();
         }
 
         /* Veraltet, ersetzt durch switchChartMode
@@ -911,9 +861,9 @@ if ($seite === 'dashboard') {
             const controls = document.getElementById('chart-controls');
             const btnText = document.getElementById('btn-forecast-text');
             
-            if (iframe.src.includes('live_diagramm.html')) {
+            if (iframe.src.includes('live_diagramm.php')) {
                 // Switch to Forecast
-                iframe.src = 'diagramm.html?t=' + new Date().getTime();
+                iframe.src = 'diagramm.php?t=' + new Date().getTime();
                 title.innerHTML = '<i class="fas fa-chart-line me-2 text-secondary"></i>SoC Prognose';
                 controls.style.display = 'none';
                 btnText.innerText = 'Leistungsverlauf';
@@ -921,7 +871,7 @@ if ($seite === 'dashboard') {
                 $.get('run_now.php'); 
             } else {
                 // Switch back to History
-                iframe.src = 'live_diagramm.html?t=' + new Date().getTime();
+                iframe.src = 'live_diagramm.php?t=' + new Date().getTime();
                 title.innerHTML = '<i class="fas fa-chart-area me-2 text-secondary"></i>Leistungsverlauf';
                 controls.style.display = 'inline-flex';
                 btnText.innerText = 'SoC Prognose';
@@ -961,13 +911,13 @@ if ($seite === 'dashboard') {
                 return false;
             };
 
-            // FIX: Reihenfolge geändert! Zuerst auf LIVE prüfen.
-            // Grund: "live_diagramm.html" enthält den String "diagramm.html", wodurch die alte Prüfung
-            // fälschlicherweise immer im Prognose-Block landete.
+            // FIX: Reihenfolge geÃ¤ndert! Zuerst auf LIVE prÃ¼fen.
+            // Grund: "live_diagramm.php" enthÃ¤lt den String "diagramm.php", wodurch die alte PrÃ¼fung
+            // fÃ¤lschlicherweise immer im Prognose-Block landete.
             
             const modeValue = document.getElementById('chart-mode-select').value;
-            const isLive = iframe.src.includes('live_diagramm.html') || modeValue === 'live';
-            const isForecast = !isLive && (iframe.src.includes('diagramm.html') || modeValue === 'forecast');
+            const isLive = iframe.src.includes('live_diagramm.php') || modeValue === 'live';
+            const isForecast = !isLive && (iframe.src.includes('diagramm.php') || modeValue === 'forecast');
 
             if (isLive) {
                 // --- LIVE VERLAUF AKTUALISIEREN ---
@@ -977,53 +927,24 @@ if ($seite === 'dashboard') {
                 const activeBtn = document.querySelector('#live-controls .btn.active');
                 if (activeBtn) hours = parseInt(activeBtn.innerText);
 
-                $.get('index.php?action=run_live_history&hours=' + hours + '&view=' + CURRENT_VIEW + '&dark=' + (DARK_MODE ? '1' : '0'), function() {
-                    const checkInterval = setInterval(function() {
-                        if (handleTimeout(checkInterval)) return; 
-
-                        $.getJSON('index.php?action=run_live_history&mode=status', function(status) {
-                            if (!status.running) {
-                                clearInterval(checkInterval);
-                                iframe.src = 'live_diagramm.html?t=' + new Date().getTime();
-                                iframe.style.opacity = '1';
-                                btn.disabled = false;
-                                btn.innerHTML = originalHtml;
-                            }
-                        });
-                    }, 1000);
-                });
+                iframe.src = 'live_diagramm.php?hours=' + hours + '&view=' + CURRENT_VIEW + '&t=' + Date.now();
+                iframe.onload = function() {
+                    iframe.style.opacity = '1';
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                };
 
             } else if (isForecast) {
                 // --- SOC PROGNOSE AKTUALISIEREN ---
-                let url = 'index.php?action=run_now&dark=' + (DARK_MODE ? '1' : '0');
-                if (isAuto) url += '&auto=1';
-
-                $.get(url, function(response) {
-                    if (response.trim() === 'skipped') {
-                        // Update nicht nötig -> Spinner weg, fertig.
-                        btn.disabled = false;
-                        btn.innerHTML = originalHtml;
-                        return;
-                    }
-
-                    const checkInterval = setInterval(function() {
-                        if (handleTimeout(checkInterval)) return;
-
-                        $.getJSON('index.php?action=status', function(status) {
-                            if (!status.running) {
-                                clearInterval(checkInterval);
-                                // Nur neu laden, wenn kein Fehler vorliegt (verhindert Flackern bei Fehlern)
-                                if (!status.error) {
-                                    iframe.src = iframe.src.split('?')[0] + '?t=' + new Date().getTime();
-                                }
-                                btn.disabled = false;
-                                btn.innerHTML = originalHtml;
-                            }
-                        });
-                    }, 1000);
-                });
+                iframe.style.opacity = '0.5';
+                iframe.src = 'diagramm.php?t=' + Date.now();
+                iframe.onload = function() {
+                    iframe.style.opacity = '1';
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                };
             } else {
-                // Archiv Modus - hier macht "Aktualisieren" weniger Sinn, aber wir können das Iframe neu laden
+                // Archiv Modus - hier macht "Aktualisieren" weniger Sinn, aber wir kÃ¶nnen das Iframe neu laden
                 iframe.src = iframe.src;
                 btn.disabled = false;
                 btn.innerHTML = originalHtml;
@@ -1075,9 +996,9 @@ if ($seite === 'dashboard') {
                 let proceed = false;
 
                 if (data.success && missing > 0) {
-                    if (confirm(`Es sind ${missing} neue Updates verfügbar.\nUpdate jetzt durchführen?`)) {
+                    if (confirm(`Es sind ${missing} neue Updates verfÃ¼gbar.\nUpdate jetzt durchfÃ¼hren?`)) {
                         proceed = true;
-                        // Standard: Änderungen behalten (stash), außer User will explizit Reset (hier vereinfacht)
+                        // Standard: Ã„nderungen behalten (stash), auÃŸer User will explizit Reset (hier vereinfacht)
                     }
                 } else {
                     alert("Das System ist auf dem neuesten Stand.");
@@ -1099,7 +1020,7 @@ if ($seite === 'dashboard') {
                 spinner.className = "fas fa-sync fa-spin me-2";
                 closeBtn.style.display = 'none';
                 finishBtn.disabled = true;
-                finishBtn.innerText = "Schließen";
+                finishBtn.innerText = "SchlieÃŸen";
                 
                 // Start Request
                 fetch('index.php?action=run_update&mode=start&t=' + Date.now())
@@ -1130,7 +1051,7 @@ if ($seite === 'dashboard') {
                 let tick = 0;
                 const interval = setInterval(() => {
                     tick++;
-                    // Zeitstempel anhängen um Cloudflare-Cache zu umgehen
+                    // Zeitstempel anhÃ¤ngen um Cloudflare-Cache zu umgehen
                     fetch('index.php?action=run_update&mode=poll&t=' + Date.now())
                         .then(r => r.json())
                         .then(data => {
@@ -1140,7 +1061,7 @@ if ($seite === 'dashboard') {
                             const modalBody = log.parentElement;
                             modalBody.scrollTop = modalBody.scrollHeight;
 
-                            // Prüfen ob Erfolgsmeldung im Log steht (Fallback, falls Prozess-Status hängt)
+                            // PrÃ¼fen ob Erfolgsmeldung im Log steht (Fallback, falls Prozess-Status hÃ¤ngt)
                             const logText = data.log || "";
                             const successFound = logText.includes("Update erfolgreich abgeschlossen") || 
                                                  logText.includes("Du bist auf dem neuesten Stand") ||
@@ -1164,10 +1085,10 @@ if ($seite === 'dashboard') {
                 
                 if (logText.includes("Update erfolgreich abgeschlossen") || logText.includes("Du bist auf dem neuesten Stand")) {
                     spinner.classList.add('fa-check-circle', 'text-success');
-                    log.innerText += "\n\n✓ Vorgang erfolgreich beendet.";
+                    log.innerText += "\n\nâœ“ Vorgang erfolgreich beendet.";
                 } else {
                     spinner.classList.add('fa-times-circle', 'text-danger');
-                    log.innerText += "\n\n✗ Update fehlgeschlagen oder unvollständig.";
+                    log.innerText += "\n\nâœ— Update fehlgeschlagen oder unvollstÃ¤ndig.";
                 }
 
                 closeBtn.style.display = 'block';
@@ -1209,7 +1130,7 @@ if ($seite === 'dashboard') {
             });
         }, 2000);
         
-        // Periodische Prüfung alle 60 Minuten (Backend cached für 4h)
+        // Periodische PrÃ¼fung alle 60 Minuten (Backend cached fÃ¼r 4h)
         setInterval(() => {
             fetch('index.php?action=check_update').then(r=>r.json()).then(d => {
                 const bNav = document.getElementById('update-badge-nav');
@@ -1229,21 +1150,21 @@ if ($seite === 'dashboard') {
         }, 3600000); // 1 Stunde
 
         function restartService() {
-            if (!confirm('Möchtest du den E3DC-Control Service wirklich neu starten?')) return;
+            if (!confirm('MÃ¶chtest du den E3DC-Control Service wirklich neu starten?')) return;
             
             fetch('index.php?action=restart_service')
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        alert("✓ Service wird neu gestartet.\nDas Web-Interface ist kurzzeitig eventuell nicht erreichbar.");
+                        alert("âœ“ Service wird neu gestartet.\nDas Web-Interface ist kurzzeitig eventuell nicht erreichbar.");
                     } else {
-                        alert("✗ Fehler: " + data.message);
+                        alert("âœ— Fehler: " + data.message);
                     }
                 })
                 .catch(err => alert("Netzwerkfehler: " + err));
         }
 
-        // Watchdog Status prüfen
+        // Watchdog Status prÃ¼fen
         function checkWatchdog() {
             $.getJSON('index.php?action=watchdog_status', function(data) {
                 const badge = $('#watchdog-badge');
@@ -1262,7 +1183,7 @@ if ($seite === 'dashboard') {
                 }
             });
         }
-        setInterval(checkWatchdog, 10000); // Alle 10 Sek prüfen
+        setInterval(checkWatchdog, 10000); // Alle 10 Sek prÃ¼fen
         checkWatchdog();
 
         function showWatchdogLog() {
@@ -1282,7 +1203,7 @@ if ($seite === 'dashboard') {
             const isOffline = badge.classList.contains('bg-danger') || badge.classList.contains('bg-warning');
             
             if (isOffline) {
-                if (confirm("Verbindungsprobleme erkannt.\nMöchtest du den E3DC-Service neu starten?")) {
+                if (confirm("Verbindungsprobleme erkannt.\nMÃ¶chtest du den E3DC-Service neu starten?")) {
                     restartService();
                 } else {
                     badge.innerText = "Lade...";
@@ -1302,7 +1223,7 @@ if ($seite === 'dashboard') {
                 .catch(err => console.error('Service Worker Registrierung fehlgeschlagen:', err));
             });
         } else {
-            console.log('Service Worker wird von diesem Browser nicht unterstützt.');
+            console.log('Service Worker wird von diesem Browser nicht unterstÃ¼tzt.');
         }
     </script>
 </body>

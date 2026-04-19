@@ -11,7 +11,7 @@ from .logging_manager import get_or_create_logger, log_task_completed, log_error
 INSTALL_PATH = get_install_path()
 system_logger = get_or_create_logger("system")
 
-PYTHON_PACKAGES = ["plotly>=5.0", "pandas-stubs", "pandas", "pytz", "matplotlib", "paho-mqtt", "requests", "pymodbus"]
+PYTHON_PACKAGES = ["paho-mqtt", "requests", "pymodbus", "pytz"]
 
 def get_venv_name():
     return load_config().get("venv_name", ".venv_e3dc")
@@ -115,7 +115,7 @@ def install_system_packages(use_venv=True):
     packages = [
         "curl", "jq", "python3-bs4", "git", "screen",
         "apache2", "php", "python3", "python3-pip", "python3-venv",
-        "python3-plotly", "libjpeg-dev", "zlib1g-dev",
+        "libjpeg-dev", "zlib1g-dev",
         "libcurl4-openssl-dev", "libssl-dev",
         "libmosquitto-dev", "libjsoncpp-dev",
         "libsqlite3-dev", "build-essential", "cmake"

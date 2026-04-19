@@ -20,7 +20,7 @@ from .installer_config import get_install_user
 from .logging_manager import get_or_create_logger, log_task_completed, log_error, log_warning
 
 # Repository-Informationen
-GITHUB_REPO = "A9xxx/Install-E3DC-Control"
+GITHUB_REPO = "A9xxx/E3DC-Classic"
 RELEASES_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INSTALLER_DIR = SCRIPT_DIR
@@ -171,19 +171,11 @@ def extract_release(zip_path, new_version):
         extracted_items = os.listdir(temp_extract)
         if DEBUG:
             print(f"[DEBUG] ZIP-Inhalt: {extracted_items}")
-        src_installer = None
-        # Suche nach dem Install-Ordner in typischer ZIP-Struktur
-        for item in extracted_items:
-            item_path = os.path.join(temp_extract, item)
-            if os.path.isdir(item_path):
-                # Prüfe, ob darin ein Install-Ordner liegt
-                possible = os.path.join(item_path, "Install")
-                if os.path.exists(possible):
-                    src_installer = possible
-                    break
-        # Fallback: Direkt im temp_extract
-        if not src_installer and os.path.exists(os.path.join(temp_extract, "Install")):
-            src_installer = os.path.join(temp_extract, "Install")
+        # Suche nach dem Verzeichnis, das installer_main.py enthält
+        for root, dirs, files in os.walk(temp_extract):
+            if "installer_main.py" in files:
+                src_installer = root
+                break
 
         if not src_installer or not os.path.exists(src_installer):
             print(f"✗ Installer-Verzeichnis nicht in ZIP gefunden: {src_installer}")

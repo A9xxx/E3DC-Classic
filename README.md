@@ -1,4 +1,4 @@
-# ⚡ E3DC-Control Installer & Web-Interface
+# ⚡ E3DC-Classic Installer & Web-Interface
 
 **Intelligente Steuerung und Visualisierung für E3DC Hauskraftwerke auf dem Raspberry Pi.**
 
@@ -10,16 +10,17 @@ Es bietet eine Komplettlösung zur Installation, Verwaltung und Visualisierung d
 ## 🎯 Was macht dieses Projekt?
 
 Es verbindet die leistungsstarke C++ Steuerung des Basis-Projekts mit einem modernen, responsiven Web-Dashboard.
+Diese Classic-Version verzichtet vollständig auf speicherfressende Python-Hintergrunddienste für das Web-Interface. Das Rendering der Diagramme erfolgt ressourcenschonend pur über HTML, PHP und clientseitiges Plotly.js. Ideal für kleine oder ältere Raspberry Pis.
 
 Die Kernfunktionen der Steuerung (von [Eba-M](https://github.com/Eba-M/E3DC-Control)):
-*   **🔋 Intelligentes Laden:** Der Speicher wird basierend auf Wetterprognosen und dynamischen Strompreisen (aWATTar/Tibber) geladen.
-*   **📉 Kostenoptimierung:** Nutzung günstiger Strompreisfenster zum Nachladen (insb. im Winter).
+*   **🔋 Intelligentes Laden:** Der Speicher wird basierend auf Wetterprognosen und dynamischen Strompreisen geladen.
+*   **📉 Kostenoptimierung:** Nutzung günstiger Strompreisfenster zum Nachladen.
 *   **☀️ Prognosebasiert:** Vermeidung von Abregelungsverlusten durch vorausschauendes Lademanagement.
 
 Zusätzliche Funktionen dieses Moduls:
-*   **📊 Visualisierung:** Ein umfassendes Web-Dashboard zeigt Live-Werte, Historie und Prognosen für PV, Batterie, Hausverbrauch, Netz, Wallbox und Wärmepumpe.
-*   **📈 Interaktive Diagramme:** Klickbare Kacheln für Detailanalysen (PV-Strings, Phasen-Spannungen, Batteriestrom etc.).
-*   **� Wallbox-Steuerung:** Manuelle und automatische Steuerung der E3DC Wallbox inkl. Ladeplanung.
+*   **📊 Visualisierung:** Ein umfassendes Web-Dashboard zeigt Live-Werte, Historie und Prognosen direkt im Browser gerendert.
+*   **📈 Interaktive Diagramme:** Klickbare Kacheln für schnelle, ressourcenschonende Analysen in der Weboberfläche.
+*   **🔌 Wallbox-Steuerung:** Steuerung der E3DC Wallbox.
 
 ---
 
@@ -56,7 +57,7 @@ Lade den Installer herunter:
 
 ```bash
 cd ~
-git clone https://github.com/A9xxx/Install-E3DC-Control.git Install
+git clone https://github.com/A9xxx/E3DC-Classic.git Install
 ```
 
 ### Schritt 3: Installer starten

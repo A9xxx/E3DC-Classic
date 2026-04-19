@@ -4,14 +4,11 @@
 diagrammphp.py - Diagramm-System & Web-Portal Installation
 
 FEATURES:
-- Extrahiert E3DC-Control.zip automatisch (Diagramm-Dateien)
-- Installiert plot_soc_changes.py nach /home/<install_user>/E3DC-Control/
 - Kopiert Web-Portal-Dateien (PHP/HTML/CSS) nach /var/www/html/
 - Erstellt /var/www/html/tmp/ Verzeichnis
 - Setzt korrekte Berechtigungen (www-data)
-- Python-Umgebung prüfen (Python 3 + plotly)
-- Automatisch/Manuell/Hybrid Diagramm-Aktualisierung
-- crontab-Integration mit konfigurierbarem Intervall
+- Python-Umgebung prüfen (Python 3)
+- Automatisches History-Backup via Crontab
 - Config-Datei für Einstellungen
 """
 import os
@@ -50,10 +47,8 @@ WWW_PATH = "/var/www/html"
 TMP_PATH = "/var/www/html/tmp"
 CONFIG_FILE = os.path.join(INSTALL_PATH, "diagram_config.json")
 CRON_COMMENT = "E3DC-Control Diagram Auto-Update"
-PLOT_SCRIPT_NAME = "plot_soc_changes.py"
 BACKUP_CRON_COMMENT = "E3DC-Control History Backup" # Neuer Kommentar für den Backup-Cron
 BACKUP_SCRIPT_PATH = "/var/www/html/backup_history.php" # Pfad zum Backup-Skript
-PLOT_LIVE_HISTORY_NAME = "plot_live_history.py"
 ZIP_NAME = "E3DC-Control.zip"
 OLD_MODULE_DIRS = ["config", "parsing", "plotting"]
 OBSOLETE_WEB_FILES = [
@@ -94,8 +89,7 @@ class DiagramInstaller:
     
     def check_python_requirements(self):
         """
-        Prüft ob Python 3 und plotly installiert sind.
-        Bietet Installation an, falls notwendig.
+        Prüft ob Python 3 installiert ist.
         """
         print("\n" + "-" * 60)
         print("Prüfe Python-Umgebung...")
@@ -112,88 +106,11 @@ class DiagramInstaller:
             )
             python_version = result.stdout.strip()
             print(f"✓ {python_version}")
+            return True
         except FileNotFoundError:
             print("❌ Python 3 nicht gefunden!")
-            print("   Installation: sudo apt-get install python3")
             log_error("diagramm", "Python 3 nicht gefunden.")
             return False
-        
-        # plotly prüfen (mindestens 5.0 erforderlich)
-        try:
-            result = subprocess.run(
-                [python_exec, "-c", "import plotly; print(plotly.__version__)"],
-                capture_output=True,
-                text=True
-            )
-            
-            if result.returncode == 0:
-                plotly_version = result.stdout.strip()
-                print(f"✓ plotly {plotly_version}")
-
-                def _parse_version(version_str):
-                    parts = []
-                    for token in version_str.split("."):
-                        num = ""
-                        for ch in token:
-                            if ch.isdigit():
-                                num += ch
-                            else:
-                                break
-                        if num:
-                            parts.append(int(num))
-                        else:
-                            break
-                    while len(parts) < 3:
-                        parts.append(0)
-                    return tuple(parts[:3])
-
-                if _parse_version(plotly_version) >= (5, 0, 0):
-                    return True
-
-                print("⚠ plotly ist zu alt (mindestens 5.0 erforderlich)")
-                # Hinweis: Installation erfolgt jetzt über system.py im venv, hier nur Warnung
-                choice = input("\nPlotly auf >=5.0 aktualisieren? (j/n): ").strip().lower()
-                if choice == 'j':
-                    print("\nAktualisiere plotly...")
-                    try:
-                        pip_exec = os.path.join(os.path.dirname(python_exec), "pip")
-                        subprocess.run(
-                            ["sudo", "-u", self.install_user, pip_exec, "install", "--upgrade", "plotly>=5.0"],
-                            check=True
-                        )
-                        print("✓ plotly erfolgreich aktualisiert")
-                        return True
-                    except subprocess.CalledProcessError:
-                        print("❌ Update fehlgeschlagen")
-                        log_error("diagramm", "pip3 upgrade für plotly fehlgeschlagen.")
-                        return False
-                else:
-                    print("⚠️  plotly >= 5.0 wird benötigt für Diagramme")
-                    return False
-            else:
-                raise ImportError()
-        
-        except (FileNotFoundError, ImportError):
-            print("❌ plotly nicht installiert!")
-            choice = input("\nPlotly jetzt installieren? (j/n): ").strip().lower()
-            
-            if choice == 'j':
-                print("\nInstalliere plotly...")
-                try:
-                    pip_exec = os.path.join(os.path.dirname(python_exec), "pip")
-                    subprocess.run(
-                        ["sudo", "-u", self.install_user, pip_exec, "install", "plotly>=5.0"],
-                        check=True
-                    )
-                    print("✓ plotly erfolgreich installiert")
-                    return True
-                except subprocess.CalledProcessError:
-                    print("❌ Installation fehlgeschlagen")
-                    log_error("diagramm", "pip3 install für plotly fehlgeschlagen.")
-                    return False
-            else:
-                print("⚠️  plotly wird benötigt für Diagramme")
-                return False
 
     
     def check_script_installed(self):
@@ -204,8 +121,7 @@ class DiagramInstaller:
     
     def extract_and_install_from_zip(self):
         """
-        Kopiert Diagramm-System-Dateien aus den lokalen Ordnern:
-        - plot_soc_changes.py → /home/<install_user>/E3DC-Control/
+        Kopiert Diagramm-System-Dateien aus lokalen Ordnern.
         - PHP/HTML Web-Portal-Dateien → /var/www/html/
         - Erstellt /var/www/html/tmp/
         - Setzt Rechte für www-data
@@ -217,68 +133,8 @@ class DiagramInstaller:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         base_dir = os.path.dirname(script_dir)
         try:
-                # 1) plot_soc_changes.py nach /home/<install_user>/E3DC-Control/ kopieren
-                print("\n→ Installiere Diagramm-Skript (plot_soc_changes.py)...")
-                source_script = os.path.join(base_dir, "scripts", PLOT_SCRIPT_NAME)
-                
-                if not os.path.isfile(source_script):
-                    print(f"❌ {PLOT_SCRIPT_NAME} nicht in ZIP gefunden!")
-                    log_error("diagramm", f"{PLOT_SCRIPT_NAME} nicht in ZIP gefunden.")
-                    return False
-                
-                os.makedirs(self.install_path, exist_ok=True)
-                shutil.copy2(source_script, self.plot_script_path)
-
-                # Sicherstellen: kein UTF-8 BOM (sonst bricht die Shebang unter Linux)
-                try:
-                    with open(self.plot_script_path, "rb") as f:
-                        content = f.read()
-                    bom = b"\xef\xbb\xbf"
-                    if content.startswith(bom):
-                        with open(self.plot_script_path, "wb") as f:
-                            f.write(content[len(bom):])
-                        print("✓ BOM aus plot_soc_changes.py entfernt")
-                        diagramm_logger.info("BOM aus plot_soc_changes.py entfernt.")
-                except Exception as e:
-                    log_warning("diagramm", f"Konnte BOM nicht prüfen/entfernen: {e}")
-                    print(f"⚠️  Konnte BOM nicht prüfen/entfernen: {e}")
-                
-                # Setze Berechtigungen für das Skript (install_user:www-data, 775)
-                try:
-                    subprocess.run(
-                        ["sudo", "chown", f"{self.install_user}:www-data", self.plot_script_path],
-                        check=True,
-                        capture_output=True
-                    )
-                    subprocess.run(
-                        ["sudo", "chmod", "775", self.plot_script_path],
-                        check=True,
-                        capture_output=True
-                    )
-                except subprocess.CalledProcessError as e:
-                    log_warning("diagramm", f"Konnte Besitzer/Rechte für Skript nicht setzen: {e}")
-                    print(f"⚠️  Konnte Besitzer/Rechte für Skript nicht setzen: {e}")
-                print(f"✓ {PLOT_SCRIPT_NAME} → {self.plot_script_path}")
-
-                # 1b) plot_live_history.py (Live-48h-Diagramm)
-                live_history_dest = os.path.join(self.install_path, PLOT_LIVE_HISTORY_NAME)
-                source_live = os.path.join(base_dir, "scripts", PLOT_LIVE_HISTORY_NAME)
-                if os.path.isfile(source_live):
-                    shutil.copy2(source_live, live_history_dest)
-                    try:
-                        with open(live_history_dest, "rb") as f:
-                            c = f.read()
-                        if c.startswith(b"\xef\xbb\xbf"):
-                            with open(live_history_dest, "wb") as f:
-                                f.write(c[3:])
-                    except Exception:
-                        pass
-                    try:
-                        subprocess.run(["sudo", "chown", f"{self.install_user}:www-data", live_history_dest], check=True, capture_output=True)
-                        subprocess.run(["sudo", "chmod", "775", live_history_dest], check=True, capture_output=True)
-                    except subprocess.CalledProcessError:
-                        pass
-                    print(f"✓ {PLOT_LIVE_HISTORY_NAME} → {live_history_dest}")
+                # Diagram scripts were removed in E3DC-Classic
+                # Plotly runs via JS in browser now
                 
                 # 2) Web-Portal Dateien rekursiv nach /var/www/html/ kopieren
                 print("\n→ Installiere Web-Portal-Dateien (PHP, CSS, JS, Icons)...")
@@ -629,14 +485,8 @@ class DiagramInstaller:
             print("Richte crontab für Auto-Update ein...")
             print("-" * 60)
             
-            # Script-Pfad (monolithisches plot_soc_changes.py)
-            plot_script = self.plot_script_path
-            python_exec = self.get_python_executable()
-            awattar_data = os.path.join(self.install_path, "awattardebug.txt")
+            # Plotly is native JS, no crontab needed for plotting
             cron_line_plot = ""
-            if self.diagram_mode in ("auto", "hybrid"):
-                cron_schedule_plot = self._get_cron_schedule(self.auto_interval)
-                cron_line_plot = f"{cron_schedule_plot} {python_exec} {plot_script} {awattar_data} normal # {CRON_COMMENT}"
             
             # Cron-Linie für backup_history.php (täglich um Mitternacht)
             cron_schedule_backup = "0 0 * * *"
@@ -909,12 +759,8 @@ class DiagramInstaller:
         print("\n" + "=" * 60)
         print("INSTALLATION ABGESCHLOSSEN")
         print("=" * 60)
-        print(f"➤ Python-Skript: {PLOT_SCRIPT_NAME}")
-        print(f"  Pfad: {self.plot_script_path}")
         print(f"➤ Web-Dateien: {WWW_PATH}")
         print(f"➤ tmp-Ordner: {TMP_PATH}")
-        print(f"➤ Modus: {self.diagram_mode.upper()}")
-        print(f"➤ Wärmepumpe: {self.enable_heatpump}")
         if self.diagram_mode in ("auto", "hybrid"):
             print(f"➤ Auto-Update: Alle {self.auto_interval} Minuten")
         print(f"➤ History-Backup: Täglich um Mitternacht")
@@ -943,11 +789,7 @@ class DiagramInstaller:
         print("\n💡 Tipps:")
         print(f"  • Web-Interface: http://{host}/index.php")
         print(f"  • Diagramm direkt: http://{host}/diagramm.html")
-        print("  • Manuell ausführen:")
-        print(f"    python3 {self.plot_script_path}")
-        if self.diagram_mode in ("auto", "hybrid"):
-            print(f"  • Crontab prüfen: crontab -l")
-            print(f"  • Crontab prüfen (für {self.install_user}): crontab -l")
+        print(f"  • History-Backup prüfen: crontab -l")
         print("=" * 60 + "\n")
 
     @staticmethod

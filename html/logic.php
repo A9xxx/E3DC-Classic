@@ -19,8 +19,7 @@ $pvStrings = [];
 $showForecast = true; // Default an
 $darkMode = true; // Default an
 $pvAtmosphere = 0.7; // Default atmosphärische Transmission
-$luxtronikEnabled = false; // Default aus
-$luxtronikIp = '192.168.178.88'; // Default IP aus deinem Skript
+    $pvAtmosphere = 0.7; // Default atmosphärische Transmission
 
 if (file_exists($configFile)) {
     $conf = file_get_contents($configFile);
@@ -38,14 +37,6 @@ if (file_exists($configFile)) {
         $darkMode = ($v === '1' || $v === 'true');
     }
     if (preg_match('/pvatmosphere\s*=\s*([\d\.,]+)/i', $conf, $m)) { $pvAtmosphere = parseConfigFloat($m[1]); }
-    if (preg_match('/luxtronik\s*=\s*([01]|true|false)/i', $conf, $m)) {
-        $v = strtolower($m[1]);
-        $luxtronikEnabled = ($v === '1' || $v === 'true');
-    }
-    if (preg_match('/luxtronik_ip\s*=\s*([0-9\.]+)/i', $conf, $m)) { $luxtronikIp = $m[1]; }
-
-    // DEBUG: Status prüfen (Zeile einkommentieren zum Testen)
-    // file_put_contents('/var/www/html/tmp/luxtronik_status.log', date('H:i:s') . " Luxtronik: " . ($luxtronikEnabled ? 'AN' : 'AUS') . "\n", FILE_APPEND);
 
     // Alle Forecast-Strings einlesen (z.B. forecast1 = 40/-50/15.4)
     if (preg_match_all('/forecast(\d+)\s*=\s*([\d\.,\-]+)\/([\d\.,\-]+)\/([\d\.,]+)/i', $conf, $matches, PREG_SET_ORDER)) {

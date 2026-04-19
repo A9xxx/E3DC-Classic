@@ -15,7 +15,7 @@ $data = [
     'grid' => 0,
     'soc' => 0,
     'wb' => 0,
-    'wp' => 0,
+
     'dc0_w' => 0, 'dc0_v' => 0, 'dc0_a' => 0,
     'dc1_w' => 0, 'dc1_v' => 0, 'dc1_a' => 0,
     'ac0_w' => 0, 'ac0_v' => 0, 'ac0_a' => 0,
@@ -162,30 +162,7 @@ if (file_exists($liveFile)) {
     }
 }
 
-// --- Logik für Wärmepumpen-Verbrauch ---
-// Ziel: Den präzisesten verfügbaren Wert verwenden.
 
-// 1. Fallback: Lese den ungenauen S0-Wert aus live.txt.
-// Dieser Wert enthält oft auch andere Verbraucher (Pumpen, Steuerung etc.) und wird als vorläufiger Wert genutzt.
-if (isset($content) && preg_match('/WP.*?([\d\.]+)\s*W/', $content, $m)) {
-    $data['wp'] = (float)$m[1] * 1000;
-}
-
-// 2. Priorität: Überschreibe mit dem präzisen Wert aus der luxtronik.json, wenn diese aktuell ist.
-// Diese Datei wird vom Python-Skript (luxtronik.py) ca. jede Minute aktualisiert und enthält den exakten Verbrauch von Verdichter + Solepumpe.
-$luxFile = '/var/www/html/ramdisk/luxtronik.json';
-if (file_exists($luxFile) && (time() - filemtime($luxFile) < 120)) { // jünger als 2 Minuten
-    $luxJson = json_decode(file_get_contents($luxFile), true);
-    if (isset($luxJson['data']['Leistung_Verdichter_W']) || isset($luxJson['data']['Leistung_Solepumpe_W'])) {
-        $comp = $luxJson['data']['Leistung_Verdichter_W'] ?? 0;
-        $pump = $luxJson['data']['Leistung_Solepumpe_W'] ?? 0;
-        // Fix: Wenn Verdichter aus, dann Verbrauch 0 (verhindert Geisterwerte)
-        if (empty($luxJson['data']['Verdichter_Ein'])) {
-            $comp = 0; $pump = 0;
-        }
-        $data['wp'] = $comp + $pump;
-    }
-}
 if ($currentPrice !== null) {
     $data['price_ct'] = round($currentPrice, 2);
     $data['price_level'] = classifyPriceLevel($currentPrice, $minPrice, $maxPrice);
@@ -205,11 +182,11 @@ if ($validData && (time() - $lastWrite) >= 60) {
         'pv' => $data['pv'],
         'bat' => $data['bat'],
         'home_raw' => $data['home_raw'],
-        'home' => (float)$data['home_raw'] - (float)$data['wp'],  // Hausverbrauch ohne Wärmepumpe
+        'home' => (float)$data['home_raw'],
         'grid' => $data['grid'],
         'soc' => $data['soc'],
         'wb' => $data['wb'],   // Wallbox
-        'wp' => $data['wp'],   // Wärmepumpe
+
         'price_ct' => $data['price_ct'],
         // Details speichern für Diagramme
         'dc0_w' => $data['dc0_w'],
