@@ -1,5 +1,12 @@
 # Changelog
  
+## [2.6.11 Classic] - Zeitzonen & Diagramm-Fixes
+
+### 🐞 Bugfixes & Diagramme
+*   **Zeitzonen-Korrektur (live_diagramm.php):** Die X-Achse der Diagramme nutzt nun die lokale Zeitzone anstatt UTC/GMT zur Gruppierung der Zeitstempel. Dies behebt den Fehler, dass Datenpunkte im Sommer (MESZ) um 2 Stunden in die Vergangenheit verschoben angezeigt wurden.
+*   **Sonnenstandsberechnung (solar.js):** Die Sonnenstandsberechnung für die PV-Prognose nutzt nun die korrekte lokale Zeit als Basis anstatt UTC-Stunden, wodurch die tageszeitliche Verschiebung der Sonnenkurve behoben wurde.
+*   **Hinweis:** Die Prognosedaten (aWATTar/Forecast) werden absichtlich weiterhin in UTC verglichen, da die Basisdaten ebenfalls in UTC vorliegen – dies funktioniert nun reibungslos zusammen mit der korrekten Visualisierung in Ortszeit.
+
 ## [2.6.10 Classic] - Web UI Fix & Self-Update via Git
 
 ### 🔧 Installer & Updates

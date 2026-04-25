@@ -76,7 +76,12 @@ $darkMode = ($confData['config']['darkmode'] ?? '1') === '1';
                         const t = new Date(j.ts);
                         if (isNaN(t) || t.getTime() < cutoff) return;
                         
-                        const mStr = t.toISOString().substring(0,16);
+                        // Lokale Zeit für Gruppenbildung verwenden (toISOString wäre UTC → 2h Offset in MESZ)
+                        const mStr = t.getFullYear() + '-' +
+                            String(t.getMonth()+1).padStart(2,'0') + '-' +
+                            String(t.getDate()).padStart(2,'0') + 'T' +
+                            String(t.getHours()).padStart(2,'0') + ':' +
+                            String(t.getMinutes()).padStart(2,'0');
                         if (currentMinute !== mStr) {
                             if (currentMinute !== null) processMinute();
                             currentMinute = mStr;

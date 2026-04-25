@@ -15,7 +15,7 @@ function getSunPosition() {
     const declination = 23.45 * Math.sin(B) * rad;
     const eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
     
-    const lst = now.getUTCHours() + now.getUTCMinutes() / 60 + LON / 15 + eot / 60;
+    const lst = now.getHours() + now.getMinutes() / 60 + (LON % 15) / 15 + eot / 60;
     const omega = (lst - 12) * 15 * rad;
     const latRad = LAT * rad;
     
